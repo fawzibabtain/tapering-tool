@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dr. Fawzi Babtain - Tapering Tool (Mobile Fixed)</title>
+    <title>Dr. Fawzi Babtain - Tapering Tool (Mobile Share)</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,8 +16,8 @@
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
         .font-arabic { font-family: 'Cairo', sans-serif; }
         
-        /* iOS Input Zoom Fix */
-        input, select, textarea { font-size: 16px !important; }
+        /* iOS Input Zoom Fix & Form Styling */
+        input, select, textarea { font-size: 16px !important; } /* Prevents auto-zoom */
         
         /* Print Styles */
         @media print {
@@ -155,8 +155,12 @@
         <div id="toolbar" class="flex justify-between items-end mb-4 px-1 no-print">
             <h3 class="font-bold text-slate-500 text-xs uppercase tracking-widest">Result</h3>
             <div class="flex gap-2">
+                <button onclick="shareImage()" class="bg-indigo-600 active:bg-indigo-800 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes"></i> Share
+                </button>
+                
                 <button onclick="downloadImage()" class="bg-emerald-600 active:bg-emerald-800 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md flex items-center gap-2">
-                    <i class="fa-regular fa-image"></i> Save Image
+                    <i class="fa-regular fa-image"></i> Save
                 </button>
             </div>
         </div>
@@ -452,6 +456,55 @@
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
+        }
+
+        // --- NEW SHARE FUNCTION ---
+        async function shareImage() {
+            const element = document.getElementById("infographic-container");
+            const patientName = document.getElementById('patientName').value || 'Schedule';
+
+            // Loading state
+            const shareBtn = event.currentTarget;
+            const originalText = shareBtn.innerHTML;
+            shareBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sharing';
+
+            try {
+                const canvas = await html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true });
+                
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        alert("Error generating image.");
+                        shareBtn.innerHTML = originalText;
+                        return;
+                    }
+
+                    const file = new File([blob], `Schedule-${patientName}.png`, { type: "image/png" });
+
+                    // Check if native sharing is supported (Mobile Safari/Chrome)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'Medication Schedule',
+                                text: `Medication schedule for ${patientName}`
+                            });
+                        } catch (err) {
+                            if (err.name !== 'AbortError') {
+                                console.error('Share failed:', err);
+                            }
+                        }
+                    } else {
+                        // Fallback for desktop or unsupported browsers
+                        alert("Sharing is not supported on this device. Please use 'Save Image' instead.");
+                    }
+                    shareBtn.innerHTML = originalText;
+                }, 'image/png');
+
+            } catch (err) {
+                console.error(err);
+                alert("Error sharing image.");
+                shareBtn.innerHTML = originalText;
+            }
         }
     </script>
 </body>
