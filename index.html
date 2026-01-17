@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dr. Fawzi Babtain - Tapering Tool (Mobile Fixed)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base Styles */
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        .font-arabic { font-family: 'Cairo', sans-serif; }
+        
+        /* iOS Input Zoom Fix */
+        input, select, textarea { font-size: 16px !important; }
+        
+        /* Print Styles */
+        @media print {
+            body { background-color: white; visibility: hidden; height: auto !important; overflow: visible !important; }
+            .no-print { display: none !important; }
+            #infographic-container, #infographic-container * { visibility: visible; }
+            #infographic-container { 
+                position: absolute; left: 0; top: 0; width: 100% !important; 
+                margin: 0 !important; box-shadow: none !important; border: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 pb-20">
+
+    <div class="fixed top-0 left-0 w-full bg-white border-b border-slate-200 z-50 shadow-md px-4 py-3 no-print">
+        <div class="flex flex-col items-center justify-center text-center">
+            <div class="flex items-center gap-2 mb-1">
+                <div class="bg-indigo-600 text-white p-1.5 rounded-md">
+                    <i class="fa-solid fa-user-doctor text-sm"></i>
+                </div>
+                <h1 class="text-base font-bold text-slate-800">Medication Tapering Tool</h1>
+            </div>
+            <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Developed by Dr. Fawzi A. Babtain • Epilepsy Clinic- KFSHRC-J</p>
+        </div>
+    </div>
+
+    <div class="max-w-lg mx-auto p-4 space-y-6 pt-24">
+        
+        <form id="taper-form" class="space-y-5" onsubmit="event.preventDefault(); generateSchedule();">
+            
+            <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
+                
+                <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-hospital-user text-indigo-600"></i> Patient Identity
+                </label>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-1">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Gender</label>
+                        <select id="gender" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Patient Name</label>
+                        <input type="text" id="patientName" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg font-medium outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-300" placeholder="الاسم بالعربية">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-5">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Medication</label>
+                    <select id="drugSelect" onchange="handleDrugSelect()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="" disabled selected>-- Select Drug --</option>
+                        <option value="levetiracetam">Levetiracetam (Keppra)</option>
+                        <option value="lamotrigine">Lamotrigine (Lamictal)</option>
+                        <option value="topiramate">Topiramate (Topamax)</option>
+                        <option value="lacosamide">Lacosamide (Lazure)</option>
+                        <option value="perampanel">Perampanel (Fycompa)</option>
+                        <option value="carbamazepine">Carbamazepine (Tegretol)</option>
+                        <option value="oxcarbazepine">Oxcarbazepine (Trileptal)</option>
+                        <option value="clobazam">Clobazam (Frisium)</option>
+                        <option value="clonazepam">Clonazepam (Rivotril)</option>
+                        <option value="other">Other / Manual Entry</option>
+                    </select>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-800 uppercase tracking-wide mb-1">Start Dose (mg)</label>
+                        <input type="number" id="currentDose" class="w-full p-3 border border-slate-300 rounded-lg font-bold text-xl text-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0">
+                        <p class="text-[10px] text-slate-400 mt-1">Single dose amount</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Target</label>
+                        <input type="number" id="targetDose" class="w-full p-3 border border-green-200 bg-green-50 rounded-lg text-green-800 font-bold outline-none" placeholder="Max">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Step</label>
+                        <input type="number" id="stepAmount" class="w-full p-3 border border-slate-200 rounded-lg outline-none" placeholder="+/-">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                     <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Freq</label>
+                        <select id="frequency" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <option value="1 Week">1 Week</option>
+                            <option value="2 Weeks">2 Weeks</option>
+                            <option value="1 Month">1 Month</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Schedule</label>
+                        <select id="scheduleType" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <option value="BID">BID (Twice)</option>
+                            <option value="OD_PM">OD (PM)</option>
+                            <option value="OD_AM">OD (AM)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Tablet Strength <span class="font-normal text-slate-400">(Opt)</span></label>
+                     <input type="number" id="tabStrength" class="w-full p-3 border border-slate-200 rounded-lg placeholder-slate-300 outline-none" placeholder="mg">
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Common Side Effects</label>
+                <div class="grid grid-cols-1 gap-2" id="side-effects-container">
+                    <p class="text-xs text-slate-400 italic">Select medication first...</p>
+                </div>
+            </div>
+
+            <button type="button" onclick="generateSchedule()" class="w-full bg-indigo-600 active:bg-indigo-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-indigo-200 transition-transform active:scale-95 flex justify-center items-center gap-2 text-lg">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+            </button>
+
+        </form>
+    </div>
+
+    <div id="preview-area" class="hidden max-w-lg mx-auto p-4 mt-4 pb-20">
+        
+        <div id="toolbar" class="flex justify-between items-end mb-4 px-1 no-print">
+            <h3 class="font-bold text-slate-500 text-xs uppercase tracking-widest">Result</h3>
+            <div class="flex gap-2">
+                <button onclick="downloadImage()" class="bg-emerald-600 active:bg-emerald-800 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md flex items-center gap-2">
+                    <i class="fa-regular fa-image"></i> Save Image
+                </button>
+            </div>
+        </div>
+
+        <div id="infographic-container" class="bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-100" dir="rtl">
+            
+            <div class="bg-indigo-900 text-white p-6 text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-40 h-40 bg-indigo-800 rounded-full mix-blend-multiply filter blur-2xl opacity-30 -mr-10 -mt-10"></div>
+                <div class="relative z-10">
+                    <h2 class="text-lg font-bold font-arabic leading-relaxed mb-3" id="outHeader"></h2>
+                    <div class="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-6 py-1.5 rounded-full mt-1">
+                        <span class="text-xl font-bold text-white font-arabic" id="outDrug"></span>
+                    </div>
+                </div>
+                <p class="text-[9px] text-indigo-400 mt-2 print:block hidden font-bold uppercase tracking-widest" id="outPatientNamePrint"></p>
+            </div>
+
+            <div class="bg-indigo-50 border-b border-indigo-100 p-3 text-center">
+                <div class="flex items-center justify-center gap-2 text-indigo-900 font-bold text-base font-arabic">
+                    <span>ابدأ هذا الجدول يوم الأحد القادم</span>
+                    <i class="fa-regular fa-calendar-check text-lg"></i>
+                </div>
+            </div>
+
+            <div class="p-4 md:p-6">
+                <div id="tableHeader" class="flex justify-between items-center text-sm font-black text-slate-800 mb-3 px-2 border-b-2 border-slate-200 pb-2">
+                    </div>
+
+                <div id="rowsContainer" class="space-y-2"></div>
+
+                <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-4 text-center">
+                    <p class="text-indigo-900 font-bold font-arabic text-lg">
+                        استمر على الجرعة الأخيرة حتى موعدك القادم
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 border-t border-slate-200 p-5">
+                <div class="flex flex-row items-start gap-3 text-right">
+                    <div class="text-amber-500 text-xl mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-slate-800 text-base mb-1 font-arabic">تعليمات وإرشادات مهمة</h4>
+                        <p id="outSideEffects" class="text-sm text-slate-600 font-arabic leading-relaxed">-</p>
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-[10px] text-amber-700 bg-amber-50 inline-block px-3 py-1 rounded-full border border-amber-100 font-arabic font-bold">
+                        تنويه: الأعراض الجانبية المذكورة عادة ما تكون مؤقتة وتختفي تدريجياً.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 text-white p-5 text-center">
+                <h3 class="text-xl font-bold font-arabic mb-2 dir-ltr"> 920012312 :للمساعدة اتصل </h3>
+                <div class="w-12 h-1 bg-indigo-500 mx-auto mb-3 rounded-full"></div>
+                <p class="text-sm font-bold text-white font-arabic">هذه التعليمات تحت إشراف د. فوزي أحمد بابطين</p>
+                <p class="text-[10px] text-slate-400 font-arabic mt-0.5">Supervised by Dr. Fawzi Babtain</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. SIDE EFFECTS DICTIONARY ---
+        const SE_DICT = {
+            'dizziness': { label: 'Dizziness', ar: 'دوخة / دوار' },
+            'sleepiness': { label: 'Sleepiness/Drowsiness', ar: 'نعاس / رغبة بالنوم' },
+            'mood': { label: 'Mood Changes (Irritability)', ar: 'تغير في المزاج / عصبية' },
+            'headache': { label: 'Headache', ar: 'صداع' },
+            'nausea': { label: 'Nausea', ar: 'غثيان' },
+            'fatigue': { label: 'Fatigue/Weakness', ar: 'تعب عام / إرهاق' },
+            'tingling': { label: 'Tingling (Fingers/Toes)', ar: 'تنميل في الأطراف' },
+            'vision': { label: 'Blurry/Double Vision', ar: 'تشوش أو ازدواجية في الرؤية' },
+            'balance': { label: 'Unsteadiness/Balance', ar: 'عدم اتزان' },
+            'weight_loss': { label: 'Weight Loss', ar: 'نقصان في الوزن' },
+            'stones': { label: 'Kidney Stones (Hydration Alert)', ar: 'حصوات كلى (يجب شرب الماء بكثرة)' },
+            'memory': { label: 'Memory/Concentration Issues', ar: 'صعوبة في التركيز أو الذاكرة' },
+            'rash_lamictal': { 
+                label: 'Skin Rash (Specific Alert)', 
+                ar: 'طفح جلدي (تنبيه: أوقف الدواء فوراً إذا ظهر طفح جلدي بحكّة واستمر لأكثر من 24 ساعة. ملاحظة: الطفح الذي يظهر بعد 8 أسابيع غالباً لا علاقة له بالدواء)',
+                isAlert: true
+            },
+            'rash_carbamazepine': {
+                label: 'Skin Rash (Specific Alert)',
+                ar: 'طفح جلدي (تنبيه: أوقف الدواء فوراً إذا ظهر طفح جلدي بحكّة واستمر لأكثر من 24 ساعة)',
+                isAlert: true
+            },
+            'rash_general': { label: 'Skin Rash', ar: 'طفح جلدي' }
+        };
+
+        // --- 2. DRUG PRESETS ---
+        const DRUG_PRESETS = {
+            'levetiracetam': { name: 'Levetiracetam (Keppra)', nameAr: 'كيبرا', dose: 500, step: 500, target: 1500, freq: '2 Weeks', effects: ['mood', 'sleepiness', 'headache', 'fatigue'] },
+            'lamotrigine': { name: 'Lamotrigine (Lamictal)', nameAr: 'لاميكتال', dose: 25, step: 25, target: 200, freq: '2 Weeks', effects: ['rash_lamictal', 'dizziness', 'vision', 'nausea', 'sleepiness'] },
+            'topiramate': { name: 'Topiramate (Topamax)', nameAr: 'توباماكس', dose: 25, step: 25, target: 200, freq: '1 Week', effects: ['tingling', 'weight_loss', 'stones', 'sleepiness', 'memory'] },
+            'lacosamide': { name: 'Lacosamide (Lazure)', nameAr: 'لازور', dose: 50, step: 50, target: 200, freq: '1 Week', effects: ['dizziness', 'headache', 'nausea', 'vision'] },
+            'perampanel': { name: 'Perampanel (Fycompa)', nameAr: 'فايكومبا', dose: 2, step: 2, target: 8, freq: '2 Weeks', effects: ['dizziness', 'sleepiness', 'mood', 'balance'] },
+            'carbamazepine': { name: 'Carbamazepine (Tegretol)', nameAr: 'تجريتول', dose: 200, step: 200, target: 600, freq: '1 Week', effects: ['dizziness', 'sleepiness', 'balance', 'nausea', 'rash_carbamazepine'] },
+            'oxcarbazepine': { name: 'Oxcarbazepine (Trileptal)', nameAr: 'ترايليبتال', dose: 300, step: 300, target: 600, freq: '1 Week', effects: ['dizziness', 'sleepiness', 'vision', 'nausea'] },
+            'clobazam': { name: 'Clobazam (Frisium)', nameAr: 'فريزيوم', dose: 5, step: 5, target: 10, freq: '1 Week', effects: ['sleepiness', 'fatigue', 'balance', 'mood'] },
+            'clonazepam': { name: 'Clonazepam (Rivotril)', nameAr: 'ريفوتريل', dose: 0.5, step: 0.5, target: 2, freq: '1 Week', effects: ['sleepiness', 'dizziness', 'fatigue', 'memory'] },
+            'other': { name: 'Other', nameAr: 'دواء آخر', dose: 0, step: 0, target: 0, freq: '1 Week', effects: ['dizziness', 'nausea', 'headache', 'rash_general', 'sleepiness'] }
+        };
+
+        // --- 3. DYNAMIC SIDE EFFECTS ---
+        function renderSideEffects(drugKey) {
+            const container = document.getElementById('side-effects-container');
+            container.innerHTML = ''; 
+            const effectsList = (DRUG_PRESETS[drugKey] && DRUG_PRESETS[drugKey].effects) ? DRUG_PRESETS[drugKey].effects : DRUG_PRESETS['other'].effects;
+
+            effectsList.forEach(key => {
+                const info = SE_DICT[key];
+                if(!info) return;
+                const isAlert = info.isAlert; 
+                const colorClass = isAlert ? 'text-red-600 font-bold bg-red-50 border-red-100' : 'text-slate-700 hover:bg-slate-50 border-slate-200';
+                
+                const html = `
+                    <label class="flex items-center gap-3 cursor-pointer p-3 rounded-lg border ${colorClass} transition-all">
+                        <input type="checkbox" class="se-check accent-indigo-600 w-5 h-5" value="${key}">
+                        <span class="text-sm leading-tight">${info.label}</span>
+                    </label>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function handleDrugSelect() {
+            const select = document.getElementById('drugSelect');
+            const key = select.value;
+            if (key !== 'other' && DRUG_PRESETS[key]) {
+                const p = DRUG_PRESETS[key];
+                document.getElementById('currentDose').value = p.dose;
+                document.getElementById('targetDose').value = p.target;
+                document.getElementById('stepAmount').value = p.step;
+                document.getElementById('frequency').value = p.freq;
+            } else if (key === 'other') {
+                document.getElementById('currentDose').value = '';
+                document.getElementById('targetDose').value = '';
+                document.getElementById('stepAmount').value = '';
+            }
+            renderSideEffects(key);
+        }
+        
+        renderSideEffects('other');
+
+        // --- 4. GENERATION LOGIC ---
+        function generateSchedule() {
+            const patientName = document.getElementById('patientName').value.trim();
+            if (!patientName) { alert("Please enter the Patient Name."); return; }
+
+            const gender = document.getElementById('gender').value;
+            const drugKey = document.getElementById('drugSelect').value;
+            const drugSelect = document.getElementById('drugSelect');
+            const drugName = drugSelect.options[drugSelect.selectedIndex].text;
+            const drugNameAr = DRUG_PRESETS[drugKey]?.nameAr || drugName.split('(')[0];
+
+            let currentSingleDose = parseFloat(document.getElementById('currentDose').value) || 0;
+            const targetSingleDose = parseFloat(document.getElementById('targetDose').value) || 0;
+            let stepPerDose = parseFloat(document.getElementById('stepAmount').value) || 0;
+            const tabStrength = parseFloat(document.getElementById('tabStrength').value) || 0;
+            const scheduleType = document.getElementById('scheduleType').value;
+            const frequency = document.getElementById('frequency').value; 
+            
+            const isMonthly = (frequency === '1 Month');
+            let weeksPerStep = 1;
+            if (frequency === '2 Weeks') weeksPerStep = 2;
+
+            const showAM = (scheduleType === 'BID' || scheduleType === 'OD_AM');
+            const showPM = (scheduleType === 'BID' || scheduleType === 'OD_PM');
+
+            const isTitratingUp = targetSingleDose > currentSingleDose;
+            if (isTitratingUp && stepPerDose <= 0) stepPerDose = Math.abs(stepPerDose);
+            if (!isTitratingUp && stepPerDose >= 0) stepPerDose = -Math.abs(stepPerDose);
+
+            if (currentSingleDose <= 0 || targetSingleDose <= 0) { alert("Please check Doses"); return; }
+
+            // UI Reveal
+            document.getElementById('preview-area').classList.remove('hidden');
+            
+            // Header
+            const greeting = gender === 'female' ? 'عزيزتي' : 'عزيزي';
+            document.getElementById('outHeader').innerHTML = `${greeting} ${patientName}، إليك تعليمات استخدام الدواء الجديد<br><span class="text-indigo-200 text-lg mt-2 block">كتب الله لك الشفاء و الصحة دائماً</span>`;
+            document.getElementById('outDrug').innerText = `${drugNameAr} (${drugName.split('(')[0].trim()})`;
+            document.getElementById('outPatientNamePrint').innerText = patientName;
+
+            // Header Columns
+            const tableHeaderEl = document.getElementById('tableHeader');
+            let headerHtml = '';
+            if (showAM) headerHtml += '<div class="flex-1 text-center">الصباح ☀️</div>';
+            if (showAM && showPM) headerHtml += '<div class="w-px"></div>';
+            if (showPM) headerHtml += '<div class="flex-1 text-center">المساء 🌙</div>';
+            headerHtml += `<div class="w-1/4 text-right">${isMonthly ? 'الشهر' : 'الأسبوع'}</div>`;
+            tableHeaderEl.innerHTML = headerHtml;
+
+            // Side Effects
+            const checkedBoxes = document.querySelectorAll('.se-check:checked');
+            const seList = Array.from(checkedBoxes).map(cb => {
+                const item = SE_DICT[cb.value];
+                if (item.isAlert) return `<span class="text-red-600 font-bold underline decoration-red-300">${item.ar}</span>`;
+                return item.ar;
+            });
+            
+            if(seList.length > 0) {
+                document.getElementById('outSideEffects').innerHTML = `<ul class="list-disc pr-4 space-y-1">${seList.map(s => `<li>${s}</li>`).join('')}</ul>`;
+            } else {
+                document.getElementById('outSideEffects').innerText = 'لم يتم تحديد أعراض جانبية.';
+            }
+
+            // Rows
+            const container = document.getElementById('rowsContainer');
+            container.innerHTML = '';
+            
+            let timeCount = 1;
+            let safetyBreak = 0;
+            let done = false;
+
+            while (!done && safetyBreak < 50) {
+                let am = 0, pm = 0;
+                if (scheduleType === 'OD_AM') { am = currentSingleDose; pm = 0; }
+                else if (scheduleType === 'OD_PM') { am = 0; pm = currentSingleDose; }
+                else { am = currentSingleDose; pm = currentSingleDose; }
+
+                const amPills = getPillText(am, tabStrength);
+                const pmPills = getPillText(pm, tabStrength);
+
+                const isTargetDose = (currentSingleDose === targetSingleDose);
+                const loopsToDo = (isMonthly || isTargetDose) ? 1 : weeksPerStep;
+
+                for (let i = 0; i < loopsToDo; i++) {
+                    let rowInner = '';
+                    
+                    if (showAM) {
+                        rowInner += `
+                        <div class="flex-1 text-center ${am === 0 ? 'opacity-20' : ''}">
+                            <div class="text-lg font-black text-slate-800">${am} ملجم</div>
+                            ${amPills ? `<div class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${amPills}</div>` : ''}
+                        </div>`;
+                    }
+                    if (showAM && showPM) {
+                        rowInner += `<div class="w-px h-10 bg-slate-200"></div>`;
+                    }
+                    if (showPM) {
+                        rowInner += `
+                        <div class="flex-1 text-center ${pm === 0 ? 'opacity-20' : ''}">
+                            <div class="text-lg font-black text-slate-800">${pm} ملجم</div>
+                            ${pmPills ? `<div class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${pmPills}</div>` : ''}
+                        </div>`;
+                    }
+
+                    const periodLabel = isMonthly ? `الشهر ${timeCount}` : `الأسبوع ${timeCount}`;
+                    rowInner += `
+                    <div class="w-1/4 text-right pl-2 border-l-2 border-slate-100 ml-2">
+                        <div class="text-base font-black text-slate-800 font-arabic">${periodLabel}</div>
+                    </div>`;
+
+                    const rowHtml = `<div class="flex items-center bg-white border-2 border-slate-100 rounded-xl p-3 shadow-sm">${rowInner}</div>`;
+                    container.innerHTML += rowHtml;
+                    timeCount++;
+                }
+
+                if (isTargetDose) {
+                    done = true;
+                } else {
+                    currentSingleDose += stepPerDose;
+                    if (isTitratingUp && currentSingleDose >= targetSingleDose) currentSingleDose = targetSingleDose;
+                    if (!isTitratingUp && currentSingleDose <= targetSingleDose) currentSingleDose = targetSingleDose;
+                }
+                safetyBreak++;
+            }
+            
+            // Auto Scroll
+            setTimeout(() => {
+                document.getElementById('preview-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function getPillText(dose, strength) {
+            if (!strength || dose === 0) return '';
+            const count = dose / strength;
+            if (count === 0.25) return 'ربع حبة';
+            if (count === 0.5) return 'نصف حبة';
+            if (count === 1) return 'حبة واحدة';
+            if (count === 1.5) return 'حبة ونصف';
+            if (count === 2) return 'حبتين';
+            if (Number.isInteger(count)) return `${count} حبات`;
+            return `${count} tab`;
+        }
+
+        function downloadImage() {
+            const element = document.getElementById("infographic-container");
+            html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Schedule-${document.getElementById('patientName').value}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
