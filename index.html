@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dr. Fawzi Babtain - Tapering Tool (App View)</title>
+    <title>Anti-seizure Medication Tool</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        /* Base Styles */
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
         .font-arabic { font-family: 'Cairo', sans-serif; }
-        
-        /* iOS Input Zoom Fix */
         input, select, textarea { font-size: 16px !important; }
         
-        /* Print Styles */
+        .view-section { display: none; animation: fadeIn 0.4s ease-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         @media print {
             body { background-color: white; visibility: hidden; height: auto !important; overflow: visible !important; }
             .no-print { display: none !important; }
@@ -32,52 +31,89 @@
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden bg-slate-50">
 
-    <div class="w-full bg-white border-b border-slate-200 z-50 shadow-md px-4 py-3 no-print flex-none">
-        <div class="flex flex-col items-center justify-center text-center">
-            <div class="flex items-center gap-2 mb-1">
-                <div class="bg-indigo-600 text-white p-1.5 rounded-md">
-                    <i class="fa-solid fa-user-doctor text-sm"></i>
-                </div>
-                <h1 class="text-base font-bold text-slate-800">Medication Tapering Tool</h1>
-            </div>
-            <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Developed by Dr. Fawzi A. Babtain • Epilepsy Clinic- KFSHRC-J</p>
+    <div id="appHeader" class="w-full bg-white border-b border-slate-200 z-50 shadow-sm px-4 py-3 no-print flex-none relative hidden">
+        <button onclick="goBack()" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-indigo-600 transition-colors p-2">
+            <i class="fa-solid fa-chevron-left text-xl"></i>
+        </button>
+
+        <div class="flex flex-col items-center justify-center text-center w-full">
+            <h1 class="text-base font-bold text-slate-800" id="headerTitle">Anti-seizure Tool</h1>
+            <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wide">Dr. Fawzi A. Babtain • KFSHRC-J</p>
         </div>
     </div>
 
-    <div id="main-scroller" class="flex-1 overflow-y-auto w-full">
-        <div class="max-w-lg mx-auto p-4 space-y-6 pb-20">
+    <div id="main-scroller" class="flex-1 overflow-y-auto w-full relative">
+        
+        <div id="view-landing" class="view-section active min-h-full bg-slate-900 text-white p-6 flex flex-col justify-center">
+            
+            <div class="text-center space-y-3 mb-8">
+                <div class="bg-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-indigo-900/50 mb-4">
+                    <i class="fa-solid fa-user-doctor text-3xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold tracking-tight">Precision Medicine Tool</h2>
+                <p class="text-indigo-200 text-sm font-medium">Epilepsy Clinic • KFSHRC-J</p>
+                <div class="h-1 w-12 bg-indigo-600 mx-auto rounded-full mt-4"></div>
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest pt-2">Developed by Dr. Fawzi Babtain</p>
+            </div>
+
+            <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-5 rounded-2xl shadow-xl mb-6">
+                <label class="block text-xs font-bold text-indigo-300 uppercase tracking-wide mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-hospital-user"></i> Patient Identity (Required)
+                </label>
+                
+                <div class="space-y-4">
+                    <div>
+                        <input type="text" id="landingName" class="w-full p-4 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-center font-bold" placeholder="Enter Patient Name / الاسم">
+                    </div>
+                    <div>
+                        <select id="landingGender" class="w-full p-4 bg-slate-800/50 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-center appearance-none font-medium">
+                            <option value="male">Male (ذكر)</option>
+                            <option value="female">Female (أنثى)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <button onclick="selectMode('titration')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-5 px-6 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-between border border-indigo-500/50">
+                    <div class="text-left">
+                        <span class="block text-lg">Medication Titration</span>
+                        <span class="text-[10px] text-indigo-200 uppercase tracking-wider">Start & Increase Dose</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-trend-up text-2xl text-indigo-200"></i>
+                </button>
+
+                <button onclick="selectMode('tapering')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-5 px-6 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-between border border-slate-700">
+                    <div class="text-left">
+                        <span class="block text-lg">Medication Tapering</span>
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wider">Decrease & Stop Dose</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-trend-down text-2xl text-slate-500"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="view-tool" class="view-section max-w-lg mx-auto p-4 space-y-6 pb-20 pt-6">
             
             <form id="taper-form" class="space-y-5" onsubmit="event.preventDefault(); generateSchedule();">
                 
-                <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
-                    
-                    <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wide mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-hospital-user text-indigo-600"></i> Patient Identity
-                    </label>
-                    
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="col-span-1">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Gender</label>
-                            <select id="gender" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </div>
-                        <div class="col-span-2">
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Patient Name</label>
-                            <input type="text" id="patientName" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg font-medium outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-300" placeholder="الاسم بالعربية">
-                        </div>
+                <div class="bg-white px-4 py-3 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+                    <div>
+                        <span class="block text-[10px] text-slate-400 uppercase font-bold">Patient</span>
+                        <span class="font-bold text-slate-800 text-sm" id="displayPatientName">...</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="block text-[10px] text-slate-400 uppercase font-bold">Mode</span>
+                        <span class="font-bold text-indigo-600 text-sm" id="displayMode">...</span>
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-5">
-                    
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Medication</label>
-                        <select id="drugSelect" onchange="handleDrugSelect()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Medication</label>
+                        <select id="drugSelect" onchange="handleDrugSelect()" class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="" disabled selected>-- Select Drug --</option>
                             <option value="levetiracetam">Levetiracetam (Keppra)</option>
                             <option value="lamotrigine">Lamotrigine (Lamictal)</option>
@@ -96,34 +132,34 @@
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2">
-                            <label class="block text-xs font-bold text-slate-800 uppercase tracking-wide mb-1">Start Dose (mg)</label>
-                            <input type="number" id="currentDose" class="w-full p-3 border border-slate-300 rounded-lg font-bold text-xl text-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0">
-                            <p class="text-[10px] text-slate-400 mt-1">Single dose amount</p>
+                            <label class="block text-xs font-bold text-slate-800 uppercase tracking-wide mb-2">Current Dose (mg)</label>
+                            <input type="number" id="currentDose" class="w-full p-3.5 border border-slate-300 rounded-xl font-bold text-xl text-slate-800 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0">
+                            <p class="text-[10px] text-slate-400 mt-1">Total single dose amount</p>
                         </div>
                         
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Target</label>
-                            <input type="number" id="targetDose" class="w-full p-3 border border-green-200 bg-green-50 rounded-lg text-green-800 font-bold outline-none" placeholder="Max">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Target</label>
+                            <input type="number" id="targetDose" class="w-full p-3 border border-green-200 bg-green-50/50 rounded-xl text-green-800 font-bold outline-none" placeholder="Max/Min">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Step</label>
-                            <input type="number" id="stepAmount" class="w-full p-3 border border-slate-200 rounded-lg outline-none" placeholder="+/-">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Step</label>
+                            <input type="number" id="stepAmount" class="w-full p-3 border border-slate-200 rounded-xl outline-none" placeholder="+/-">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                          <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Freq</label>
-                            <select id="frequency" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Freq</label>
+                            <select id="frequency" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
                                 <option value="1 Week">1 Week</option>
                                 <option value="2 Weeks">2 Weeks</option>
                                 <option value="1 Month">1 Month</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Schedule</label>
-                            <select id="scheduleType" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium outline-none">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Schedule</label>
+                            <select id="scheduleType" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none">
                                 <option value="BID">BID (Twice)</option>
                                 <option value="OD_PM">OD (PM)</option>
                                 <option value="OD_AM">OD (AM)</option>
@@ -132,33 +168,32 @@
                     </div>
 
                     <div>
-                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Tablet Strength <span class="font-normal text-slate-400">(Opt)</span></label>
-                         <input type="number" id="tabStrength" class="w-full p-3 border border-slate-200 rounded-lg placeholder-slate-300 outline-none" placeholder="mg">
+                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Tablet Strength <span class="font-normal text-slate-400">(Optional)</span></label>
+                         <input type="number" id="tabStrength" class="w-full p-3 border border-slate-200 rounded-xl placeholder-slate-300 outline-none" placeholder="mg">
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div id="se-section" class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-3">Common Side Effects</label>
                     <div class="grid grid-cols-1 gap-2" id="side-effects-container">
                         <p class="text-xs text-slate-400 italic">Select medication first...</p>
                     </div>
                 </div>
 
-                <button type="button" onclick="generateSchedule()" class="w-full bg-indigo-600 active:bg-indigo-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-indigo-200 transition-transform active:scale-95 flex justify-center items-center gap-2 text-lg">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
+                <button type="button" onclick="generateSchedule()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-indigo-200 transition-transform active:scale-[0.98] flex justify-center items-center gap-2 text-lg">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Table
                 </button>
 
             </form>
 
-            <div id="preview-area" class="hidden mt-4">
+            <div id="preview-area" class="hidden mt-8 border-t border-slate-200 pt-8">
                 
                 <div id="toolbar" class="flex justify-between items-end mb-4 px-1 no-print">
-                    <h3 class="font-bold text-slate-500 text-xs uppercase tracking-widest">Result</h3>
+                    <h3 class="font-bold text-slate-500 text-xs uppercase tracking-widest">Preview</h3>
                     <div class="flex gap-2">
                         <button onclick="shareImage()" class="bg-indigo-600 active:bg-indigo-800 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md flex items-center gap-2">
                             <i class="fa-solid fa-share-nodes"></i> Share
                         </button>
-                        
                         <button onclick="downloadImage()" class="bg-emerald-600 active:bg-emerald-800 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md flex items-center gap-2">
                             <i class="fa-regular fa-image"></i> Save
                         </button>
@@ -186,12 +221,10 @@
                     </div>
 
                     <div class="p-4 md:p-6">
-                        <div id="tableHeader" class="flex justify-between items-center text-sm font-black text-slate-800 mb-3 px-2 border-b-2 border-slate-200 pb-2">
-                            </div>
-
+                        <div id="tableHeader" class="flex justify-between items-center text-sm font-black text-slate-800 mb-3 px-2 border-b-2 border-slate-200 pb-2"></div>
                         <div id="rowsContainer" class="space-y-2"></div>
-
-                        <div class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-4 text-center">
+                        
+                        <div id="finalInstructionBox" class="mt-6 bg-slate-50 border-2 border-slate-200 rounded-xl p-4 text-center">
                             <p class="text-indigo-900 font-bold font-arabic text-lg">
                                 استمر على الجرعة الأخيرة حتى موعدك القادم
                             </p>
@@ -206,57 +239,98 @@
                                 <p id="outSideEffects" class="text-sm text-slate-600 font-arabic leading-relaxed">-</p>
                             </div>
                         </div>
-                        <div class="mt-4 text-center">
-                            <p class="text-[10px] text-amber-700 bg-amber-50 inline-block px-3 py-1 rounded-full border border-amber-100 font-arabic font-bold">
-                                تنويه: الأعراض الجانبية عادة ما تكون مؤقتة وتختفي تدريجياً.
-                            </p>
-                        </div>
+                        <div class="mt-4 text-center" id="disclaimerBox">
+                            </div>
                     </div>
 
                     <div class="bg-slate-900 text-white p-5 text-center">
                         <h3 class="text-xl font-bold font-arabic mb-2 dir-ltr">
-                            للمساعدة اتصل:
-                            <br>
-                            <span class="block mt-1">920012312</span>
+                            للحصول على مساعدة طبية أثناء فترة العلاج، اتصل على: <br>
+                            <a href="tel:920012312" class="block mt-1 hover:text-indigo-300 transition-colors">920012312</a>
                         </h3>
                         <div class="w-12 h-1 bg-indigo-500 mx-auto mb-3 rounded-full"></div>
                         <p class="text-sm font-bold text-white font-arabic">هذه التعليمات تحت إشراف د. فوزي أحمد بابطين</p>
                         <p class="text-[10px] text-slate-400 font-arabic mt-0.5">Supervised by Dr. Fawzi Babtain</p>
                     </div>
                 </div>
+
+                <div class="mt-8 text-center no-print">
+                    <button onclick="resetApp()" class="bg-white border-2 border-indigo-100 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-8 rounded-full shadow-sm transition-all active:scale-95">
+                        <i class="fa-solid fa-user-plus mr-2"></i> Start New Patient
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. SIDE EFFECTS DICTIONARY ---
+        let appState = { mode: 'titration', name: '', gender: 'male' };
+
+        function selectMode(mode) {
+            const name = document.getElementById('landingName').value.trim();
+            const gender = document.getElementById('landingGender').value;
+
+            if (!name) {
+                alert("Please enter the Patient Name to continue.");
+                document.getElementById('landingName').focus();
+                return;
+            }
+
+            appState.mode = mode;
+            appState.name = name;
+            appState.gender = gender;
+
+            document.getElementById('displayPatientName').innerText = name;
+            document.getElementById('displayMode').innerText = mode === 'titration' ? "Titration (Up)" : "Tapering (Down)";
+            
+            document.getElementById('view-landing').classList.remove('active');
+            document.getElementById('view-tool').classList.add('active');
+            document.getElementById('appHeader').classList.remove('hidden');
+
+            if (mode === 'tapering') {
+                document.getElementById('se-section').style.display = 'none'; 
+            } else {
+                document.getElementById('se-section').style.display = 'block';
+                renderSideEffects(document.getElementById('drugSelect').value);
+            }
+
+            // Update doses if drug is already selected
+            if(document.getElementById('drugSelect').value) {
+                handleDrugSelect();
+            }
+        }
+
+        function goBack() {
+            document.getElementById('view-tool').classList.remove('active');
+            document.getElementById('view-landing').classList.add('active');
+            document.getElementById('appHeader').classList.add('hidden');
+            document.getElementById('preview-area').classList.add('hidden');
+        }
+
+        function resetApp() {
+            location.reload();
+        }
+
+        // --- PRESETS & DATA ---
         const SE_DICT = {
             'dizziness': { label: 'Dizziness', ar: 'دوخة / دوار' },
             'sleepiness': { label: 'Sleepiness/Drowsiness', ar: 'نعاس / رغبة بالنوم' },
-            'mood': { label: 'Mood Changes (Irritability)', ar: 'تغير في المزاج / عصبية' },
+            'mood': { label: 'Mood Changes', ar: 'تغير في المزاج / عصبية' },
             'headache': { label: 'Headache', ar: 'صداع' },
             'nausea': { label: 'Nausea', ar: 'غثيان' },
-            'fatigue': { label: 'Fatigue/Weakness', ar: 'تعب عام / إرهاق' },
-            'tingling': { label: 'Tingling (Fingers/Toes)', ar: 'تنميل في الأطراف' },
-            'vision': { label: 'Blurry/Double Vision', ar: 'تشوش أو ازدواجية في الرؤية' },
-            'balance': { label: 'Unsteadiness/Balance', ar: 'عدم اتزان' },
+            'fatigue': { label: 'Fatigue', ar: 'تعب عام / إرهاق' },
+            'tingling': { label: 'Tingling', ar: 'تنميل في الأطراف' },
+            'vision': { label: 'Blurry Vision', ar: 'تشوش في الرؤية' },
+            'balance': { label: 'Imbalance', ar: 'عدم اتزان' },
             'weight_loss': { label: 'Weight Loss', ar: 'نقصان في الوزن' },
-            'stones': { label: 'Kidney Stones (Hydration Alert)', ar: 'حصوات كلى (يجب شرب الماء بكثرة)' },
-            'memory': { label: 'Memory/Concentration Issues', ar: 'صعوبة في التركيز أو الذاكرة' },
-            'rash_lamictal': { 
-                label: 'Skin Rash (Specific Alert)', 
-                ar: 'طفح جلدي (تنبيه: أوقف الدواء فوراً إذا ظهر طفح جلدي بحكّة واستمر لأكثر من 24 ساعة. ملاحظة: الطفح الذي يظهر بعد 8 أسابيع غالباً لا علاقة له بالدواء)',
-                isAlert: true
-            },
-            'rash_carbamazepine': {
-                label: 'Skin Rash (Specific Alert)',
-                ar: 'طفح جلدي (تنبيه: أوقف الدواء فوراً إذا ظهر طفح جلدي بحكّة واستمر لأكثر من 24 ساعة)',
-                isAlert: true
-            },
-            'rash_general': { label: 'Skin Rash', ar: 'طفح جلدي' }
+            'stones': { label: 'Kidney Stones', ar: 'حصوات كلى (يجب شرب الماء)' },
+            'memory': { label: 'Memory Issues', ar: 'صعوبة في التركيز' },
+            'rash_lamictal': { label: 'Rash (Alert)', ar: 'طفح جلدي (تنبيه: أوقف الدواء فوراً إذا ظهر طفح جلدي بحكّة واستمر لأكثر من 24 ساعة. ملاحظة: الطفح الذي يظهر بعد 8 أسابيع غالباً لا علاقة له بالدواء)', isAlert: true },
+            'rash_carbamazepine': { label: 'Rash (Alert)', ar: 'طفح جلدي (تنبيه: أوقف الدواء فوراً إذا ظهر طفح جلدي بحكّة واستمر لأكثر من 24 ساعة)', isAlert: true },
+            'rash_general': { label: 'Rash', ar: 'طفح جلدي' }
         };
 
-        // --- 2. DRUG PRESETS ---
         const DRUG_PRESETS = {
             'levetiracetam': { name: 'Levetiracetam (Keppra)', nameAr: 'كيبرا', dose: 500, step: 500, target: 1500, freq: '2 Weeks', effects: ['mood', 'sleepiness', 'headache', 'fatigue'] },
             'lamotrigine': { name: 'Lamotrigine (Lamictal)', nameAr: 'لاميكتال', dose: 25, step: 25, target: 200, freq: '2 Weeks', effects: ['rash_lamictal', 'dizziness', 'vision', 'nausea', 'sleepiness'] },
@@ -270,7 +344,6 @@
             'other': { name: 'Other', nameAr: 'دواء آخر', dose: 0, step: 0, target: 0, freq: '1 Week', effects: ['dizziness', 'nausea', 'headache', 'rash_general', 'sleepiness'] }
         };
 
-        // --- 3. DYNAMIC SIDE EFFECTS ---
         function renderSideEffects(drugKey) {
             const container = document.getElementById('side-effects-container');
             container.innerHTML = ''; 
@@ -293,33 +366,31 @@
         }
 
         function handleDrugSelect() {
-            const select = document.getElementById('drugSelect');
-            const key = select.value;
+            const key = document.getElementById('drugSelect').value;
             if (key !== 'other' && DRUG_PRESETS[key]) {
                 const p = DRUG_PRESETS[key];
-                document.getElementById('currentDose').value = p.dose;
-                document.getElementById('targetDose').value = p.target;
+                
+                // Smart Defaults based on Mode
+                if (appState.mode === 'tapering') {
+                    // Tapering: Start High (from preset target), Target 0
+                    document.getElementById('currentDose').value = p.target;
+                    document.getElementById('targetDose').value = 0;
+                } else {
+                    // Titration: Start Low, Target High
+                    document.getElementById('currentDose').value = p.dose;
+                    document.getElementById('targetDose').value = p.target;
+                }
+                
                 document.getElementById('stepAmount').value = p.step;
                 document.getElementById('frequency').value = p.freq;
-            } else if (key === 'other') {
-                document.getElementById('currentDose').value = '';
-                document.getElementById('targetDose').value = '';
-                document.getElementById('stepAmount').value = '';
             }
-            renderSideEffects(key);
+            if (appState.mode === 'titration') renderSideEffects(key);
         }
-        
-        renderSideEffects('other');
 
-        // --- 4. GENERATION LOGIC ---
+        // --- MAIN LOGIC ---
         function generateSchedule() {
-            const patientName = document.getElementById('patientName').value.trim();
-            if (!patientName) { alert("Please enter the Patient Name."); return; }
-
-            const gender = document.getElementById('gender').value;
             const drugKey = document.getElementById('drugSelect').value;
-            const drugSelect = document.getElementById('drugSelect');
-            const drugName = drugSelect.options[drugSelect.selectedIndex].text;
+            const drugName = document.getElementById('drugSelect').options[document.getElementById('drugSelect').selectedIndex].text;
             const drugNameAr = DRUG_PRESETS[drugKey]?.nameAr || drugName.split('(')[0];
 
             let currentSingleDose = parseFloat(document.getElementById('currentDose').value) || 0;
@@ -329,52 +400,68 @@
             const scheduleType = document.getElementById('scheduleType').value;
             const frequency = document.getElementById('frequency').value; 
             
-            const isMonthly = (frequency === '1 Month');
-            let weeksPerStep = 1;
-            if (frequency === '2 Weeks') weeksPerStep = 2;
+            // Logic Validation
+            if (appState.mode === 'titration') {
+                if (currentSingleDose >= targetSingleDose) { alert("For Titration, Target Dose must be HIGHER than Start Dose."); return; }
+                stepPerDose = Math.abs(stepPerDose); 
+            } else {
+                if (currentSingleDose <= targetSingleDose) { alert("For Tapering, Target Dose must be LOWER than Start Dose."); return; }
+                stepPerDose = -Math.abs(stepPerDose); 
+            }
+            if (currentSingleDose < 0 || targetSingleDose < 0) { alert("Doses cannot be negative."); return; }
 
+            // TAPERING LOGIC: Skip the current dose, start from (Current - Step)
+            if (appState.mode === 'tapering') {
+                currentSingleDose += stepPerDose; // Subtract step immediately
+                if (currentSingleDose < 0) currentSingleDose = 0;
+            }
+
+            // Reveal
+            document.getElementById('preview-area').classList.remove('hidden');
+            
+            // Header Content
+            const greeting = appState.gender === 'female' ? 'الأخت الفاضلة' : 'الأخ الفاضل';
+            
+            if (appState.mode === 'tapering') {
+                document.getElementById('outHeader').innerHTML = `${greeting} ${appState.name}، إليك جدول سحب الدواء وإيقافه تدريجياً<br><span class="text-indigo-200 text-lg mt-2 block">كتب الله لك الشفاء و الصحة دائماً</span>`;
+                document.getElementById('outSideEffects').innerHTML = `<span class="text-red-600 font-bold text-base">في حال تكرار النوبات لا قدر الله، يجب العودة للجرعة السابقة واستشارة الطبيب.</span>`;
+                document.getElementById('disclaimerBox').innerHTML = '';
+                document.getElementById('finalInstructionBox').style.display = 'none'; 
+            } else {
+                document.getElementById('outHeader').innerHTML = `${greeting} ${appState.name}، إليك تعليمات استخدام الدواء الجديد<br><span class="text-indigo-200 text-lg mt-2 block">كتب الله لك الشفاء و الصحة دائماً</span>`;
+                
+                const checkedBoxes = document.querySelectorAll('.se-check:checked');
+                const seList = Array.from(checkedBoxes).map(cb => {
+                    const item = SE_DICT[cb.value];
+                    return item.isAlert ? `<span class="text-red-600 font-bold underline decoration-red-300">${item.ar}</span>` : item.ar;
+                });
+                
+                if(seList.length > 0) {
+                    document.getElementById('outSideEffects').innerHTML = `<ul class="list-disc pr-4 space-y-1">${seList.map(s => `<li>${s}</li>`).join('')}</ul>`;
+                } else {
+                    document.getElementById('outSideEffects').innerText = 'لم يتم تحديد أعراض جانبية.';
+                }
+                document.getElementById('disclaimerBox').innerHTML = `<p class="text-[10px] text-amber-700 bg-amber-50 inline-block px-3 py-1 rounded-full border border-amber-100 font-arabic font-bold">تنويه: الأعراض الجانبية عادة ما تكون مؤقتة وتختفي تدريجياً.</p>`;
+                document.getElementById('finalInstructionBox').style.display = 'block'; 
+            }
+
+            document.getElementById('outDrug').innerText = `${drugNameAr} (${drugName.split('(')[0].trim()})`;
+            document.getElementById('outPatientNamePrint').innerText = appState.name;
+
+            // Table Header
+            const isMonthly = (frequency === '1 Month');
+            let weeksPerStep = (frequency === '2 Weeks') ? 2 : 1;
             const showAM = (scheduleType === 'BID' || scheduleType === 'OD_AM');
             const showPM = (scheduleType === 'BID' || scheduleType === 'OD_PM');
 
-            const isTitratingUp = targetSingleDose > currentSingleDose;
-            if (isTitratingUp && stepPerDose <= 0) stepPerDose = Math.abs(stepPerDose);
-            if (!isTitratingUp && stepPerDose >= 0) stepPerDose = -Math.abs(stepPerDose);
-
-            if (currentSingleDose <= 0 || targetSingleDose <= 0) { alert("Please check Doses"); return; }
-
-            // UI Reveal
-            document.getElementById('preview-area').classList.remove('hidden');
-            
-            // Header
-            const greeting = gender === 'female' ? 'عزيزتي' : 'عزيزي';
-            document.getElementById('outHeader').innerHTML = `${greeting} ${patientName}، إليك تعليمات استخدام الدواء الجديد<br><span class="text-indigo-200 text-lg mt-2 block">كتب الله لك الشفاء و الصحة دائماً</span>`;
-            document.getElementById('outDrug').innerText = `${drugNameAr} (${drugName.split('(')[0].trim()})`;
-            document.getElementById('outPatientNamePrint').innerText = patientName;
-
-            // Header Columns
-            const tableHeaderEl = document.getElementById('tableHeader');
             let headerHtml = '';
             if (showAM) headerHtml += '<div class="flex-1 text-center">الصباح ☀️</div>';
             if (showAM && showPM) headerHtml += '<div class="w-px"></div>';
             if (showPM) headerHtml += '<div class="flex-1 text-center">المساء 🌙</div>';
             headerHtml += `<div class="w-1/4 text-right">${isMonthly ? 'الشهر' : 'الأسبوع'}</div>`;
-            tableHeaderEl.innerHTML = headerHtml;
+            document.getElementById('tableHeader').innerHTML = headerHtml;
 
-            // Side Effects
-            const checkedBoxes = document.querySelectorAll('.se-check:checked');
-            const seList = Array.from(checkedBoxes).map(cb => {
-                const item = SE_DICT[cb.value];
-                if (item.isAlert) return `<span class="text-red-600 font-bold underline decoration-red-300">${item.ar}</span>`;
-                return item.ar;
-            });
-            
-            if(seList.length > 0) {
-                document.getElementById('outSideEffects').innerHTML = `<ul class="list-disc pr-4 space-y-1">${seList.map(s => `<li>${s}</li>`).join('')}</ul>`;
-            } else {
-                document.getElementById('outSideEffects').innerText = 'لم يتم تحديد أعراض جانبية.';
-            }
-
-            // Rows
+            // Generate Rows
             const container = document.getElementById('rowsContainer');
             container.innerHTML = '';
             
@@ -391,56 +478,49 @@
                 const amPills = getPillText(am, tabStrength);
                 const pmPills = getPillText(pm, tabStrength);
 
-                const isTargetDose = (currentSingleDose === targetSingleDose);
+                const isTargetDose = (appState.mode === 'titration') 
+                    ? (currentSingleDose >= targetSingleDose) 
+                    : (currentSingleDose <= targetSingleDose);
+
+                if (isTargetDose) {
+                    currentSingleDose = targetSingleDose;
+                    done = true;
+                }
+
                 const loopsToDo = (isMonthly || isTargetDose) ? 1 : weeksPerStep;
 
                 for (let i = 0; i < loopsToDo; i++) {
                     let rowInner = '';
-                    
                     if (showAM) {
-                        rowInner += `
-                        <div class="flex-1 text-center ${am === 0 ? 'opacity-20' : ''}">
+                        rowInner += `<div class="flex-1 text-center ${am === 0 ? 'opacity-20' : ''}">
                             <div class="text-lg font-black text-slate-800">${am} ملجم</div>
                             ${amPills ? `<div class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${amPills}</div>` : ''}
                         </div>`;
                     }
-                    if (showAM && showPM) {
-                        rowInner += `<div class="w-px h-10 bg-slate-200"></div>`;
-                    }
+                    if (showAM && showPM) rowInner += `<div class="w-px h-10 bg-slate-200"></div>`;
                     if (showPM) {
-                        rowInner += `
-                        <div class="flex-1 text-center ${pm === 0 ? 'opacity-20' : ''}">
+                        rowInner += `<div class="flex-1 text-center ${pm === 0 ? 'opacity-20' : ''}">
                             <div class="text-lg font-black text-slate-800">${pm} ملجم</div>
                             ${pmPills ? `<div class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${pmPills}</div>` : ''}
                         </div>`;
                     }
-
                     const periodLabel = isMonthly ? `الشهر ${timeCount}` : `الأسبوع ${timeCount}`;
-                    rowInner += `
-                    <div class="w-1/4 text-right pl-2 border-l-2 border-slate-100 ml-2">
-                        <div class="text-base font-black text-slate-800 font-arabic">${periodLabel}</div>
-                    </div>`;
-
-                    const rowHtml = `<div class="flex items-center bg-white border-2 border-slate-100 rounded-xl p-3 shadow-sm">${rowInner}</div>`;
-                    container.innerHTML += rowHtml;
+                    rowInner += `<div class="w-1/4 text-right pl-2 border-l-2 border-slate-100 ml-2"><div class="text-base font-black text-slate-800 font-arabic">${periodLabel}</div></div>`;
+                    
+                    container.innerHTML += `<div class="flex items-center bg-white border-2 border-slate-100 rounded-xl p-3 shadow-sm">${rowInner}</div>`;
                     timeCount++;
                 }
 
-                if (isTargetDose) {
-                    done = true;
-                } else {
+                if (!done) {
                     currentSingleDose += stepPerDose;
-                    if (isTitratingUp && currentSingleDose >= targetSingleDose) currentSingleDose = targetSingleDose;
-                    if (!isTitratingUp && currentSingleDose <= targetSingleDose) currentSingleDose = targetSingleDose;
+                    if (appState.mode === 'titration' && currentSingleDose >= targetSingleDose) currentSingleDose = targetSingleDose;
+                    if (appState.mode === 'tapering' && currentSingleDose <= targetSingleDose) currentSingleDose = targetSingleDose;
                 }
                 safetyBreak++;
             }
             
-            // Auto Scroll
             setTimeout(() => {
-                const element = document.getElementById('preview-area');
-                // Scroll the container (main-scroller) instead of window
-                document.getElementById('main-scroller').scrollTo({ top: element.offsetTop - 20, behavior: 'smooth' });
+                document.getElementById('main-scroller').scrollTo({ top: document.getElementById('preview-area').offsetTop - 20, behavior: 'smooth' });
             }, 100);
         }
 
@@ -460,57 +540,29 @@
             const element = document.getElementById("infographic-container");
             html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Schedule-${document.getElementById('patientName').value}.png`;
+                link.download = `Schedule-${appState.name}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
         }
 
-        // --- NEW SHARE FUNCTION ---
         async function shareImage() {
             const element = document.getElementById("infographic-container");
-            const patientName = document.getElementById('patientName').value || 'Schedule';
-
-            // Loading state
             const shareBtn = event.currentTarget;
             const originalText = shareBtn.innerHTML;
             shareBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sharing';
-
             try {
                 const canvas = await html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true });
-                
                 canvas.toBlob(async (blob) => {
-                    if (!blob) {
-                        alert("Error generating image.");
-                        shareBtn.innerHTML = originalText;
-                        return;
-                    }
-
-                    const file = new File([blob], `Schedule-${patientName}.png`, { type: "image/png" });
-
+                    if (!blob) { alert("Error generating image."); shareBtn.innerHTML = originalText; return; }
+                    const file = new File([blob], `Schedule-${appState.name}.png`, { type: "image/png" });
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: 'Medication Schedule',
-                                text: `Medication schedule for ${patientName}`
-                            });
-                        } catch (err) {
-                            if (err.name !== 'AbortError') {
-                                console.error('Share failed:', err);
-                            }
-                        }
-                    } else {
-                        alert("Sharing is not supported on this device. Please use 'Save Image' instead.");
-                    }
+                        try { await navigator.share({ files: [file], title: 'Medication Schedule' }); } 
+                        catch (err) { if (err.name !== 'AbortError') console.error(err); }
+                    } else { alert("Sharing not supported. Use Save."); }
                     shareBtn.innerHTML = originalText;
                 }, 'image/png');
-
-            } catch (err) {
-                console.error(err);
-                alert("Error sharing image.");
-                shareBtn.innerHTML = originalText;
-            }
+            } catch (err) { console.error(err); shareBtn.innerHTML = originalText; }
         }
     </script>
 </body>
