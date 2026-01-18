@@ -22,13 +22,40 @@
         .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* --- PRINT STYLES (A4 & Color) --- */
         @media print {
-            body { background-color: white; visibility: hidden; height: auto !important; overflow: visible !important; }
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            body, html {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background: white;
+            }
+            body * { visibility: hidden; }
             .no-print { display: none !important; }
-            #infographic-container, #infographic-container * { visibility: visible; }
-            #infographic-container { 
-                position: absolute; left: 0; top: 0; width: 100% !important; 
-                margin: 0 !important; box-shadow: none !important; border: none !important;
+            
+            #infographic-container {
+                visibility: visible;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100% !important;
+                /* Scale down to ensure it fits one A4 page */
+                transform: scale(0.85); 
+                transform-origin: top center;
+                margin-top: 20px;
+                box-shadow: none !important;
+                border: none !important;
+                /* FORCE COLOR PRINTING */
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #infographic-container * {
+                visibility: visible;
             }
         }
     </style>
@@ -198,6 +225,9 @@
                             </button>
                             <button onclick="downloadImage()" class="bg-emerald-600 active:bg-emerald-800 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md flex items-center gap-2 transition-all">
                                 <i class="fa-regular fa-image"></i> Save
+                            </button>
+                            <button onclick="window.print()" class="bg-slate-700 active:bg-slate-800 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md flex items-center gap-2 transition-all">
+                                <i class="fa-solid fa-print"></i> PDF
                             </button>
                         </div>
                     </div>
@@ -509,14 +539,42 @@
 
                 for (let i = 0; i < loopsToDo; i++) {
                     let rowInner = '';
-                    if (showAM) rowInner += `<div class="flex-1 text-center ${am === 0 ? 'opacity-20' : ''}"><div class="text-lg font-black text-slate-800">${am} ملجم</div>${amPills ? `<div class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${amPills}</div>` : ''}</div>`;
-                    if (showAM && showPM) rowInner += `<div class="w-px h-10 bg-slate-200"></div>`;
-                    if (showPM) rowInner += `<div class="flex-1 text-center ${pm === 0 ? 'opacity-20' : ''}"><div class="text-lg font-black text-slate-800">${pm} ملجم</div>${pmPills ? `<div class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${pmPills}</div>` : ''}</div>`;
                     
+                    // -- NEW LOGIC: Tapering Check for Last Step --
+                    if (appState.mode === 'tapering' && currentSingleDose === 0) {
+                        rowInner = `
+                            <div class="flex-1 text-center bg-blue-50 text-blue-700 font-bold text-xl py-3 rounded-lg border border-blue-100 font-arabic mx-2 shadow-sm">
+                                يتم إيقاف العلاج
+                            </div>
+                        `;
+                    } else {
+                        if (showAM) {
+                            rowInner += `
+                            <div class="flex-1 text-center ${am === 0 ? 'opacity-20' : ''}">
+                                <div class="text-lg font-black text-slate-800">${am} ملجم</div>
+                                ${amPills ? `<div class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${amPills}</div>` : ''}
+                            </div>`;
+                        }
+                        if (showAM && showPM) {
+                            rowInner += `<div class="w-px h-10 bg-slate-200"></div>`;
+                        }
+                        if (showPM) {
+                            rowInner += `
+                            <div class="flex-1 text-center ${pm === 0 ? 'opacity-20' : ''}">
+                                <div class="text-lg font-black text-slate-800">${pm} ملجم</div>
+                                ${pmPills ? `<div class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${pmPills}</div>` : ''}
+                            </div>`;
+                        }
+                    }
+
                     const periodLabel = isMonthly ? `الشهر ${timeCount}` : `الأسبوع ${timeCount}`;
-                    rowInner += `<div class="w-1/4 text-right pl-2 border-l-2 border-slate-100 ml-2"><div class="text-base font-black text-slate-800 font-arabic">${periodLabel}</div></div>`;
-                    
-                    container.innerHTML += `<div class="flex items-center bg-white border-2 border-slate-100 rounded-xl p-3 shadow-sm">${rowInner}</div>`;
+                    rowInner += `
+                    <div class="w-1/4 text-right pl-2 border-l-2 border-slate-100 ml-2">
+                        <div class="text-base font-black text-slate-800 font-arabic">${periodLabel}</div>
+                    </div>`;
+
+                    const rowHtml = `<div class="flex items-center bg-white border-2 border-slate-100 rounded-xl p-3 shadow-sm">${rowInner}</div>`;
+                    container.innerHTML += rowHtml;
                     timeCount++;
                 }
 
@@ -528,7 +586,11 @@
                 safetyBreak++;
             }
             
-            setTimeout(() => { document.getElementById('preview-area').scrollIntoView({ behavior: 'smooth' }); }, 100);
+            // Auto Scroll to Top
+            setTimeout(() => {
+                const preview = document.getElementById('preview-area');
+                preview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
         }
 
         function getPillText(dose, strength) {
