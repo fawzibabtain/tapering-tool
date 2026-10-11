@@ -157,6 +157,11 @@
                             <option value="clonazepam">Clonazepam (Rivotril)</option>
                             <option value="other">Other / Manual Entry</option>
                         </select>
+                        
+                        <div id="customDrugContainer" class="hidden mt-3">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Medication Name / اسم الدواء</label>
+                            <input type="text" id="customDrugName" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-colors" placeholder="Enter medication name / اسم الدواء">
+                        </div>
                     </div>
 
                     <hr class="border-slate-100">
@@ -186,6 +191,7 @@
                                 <option value="1 Week">1 Week</option>
                                 <option value="2 Weeks">2 Weeks</option>
                                 <option value="1 Month">1 Month</option>
+                                <option value="2 Months">2 Months</option>
                             </select>
                         </div>
                         <div>
@@ -338,6 +344,10 @@
                 if(drugVal && drugVal !== 'other' && DRUG_PRESETS[drugVal]){
                     document.getElementById('currentDose').value = DRUG_PRESETS[drugVal].target;
                     document.getElementById('targetDose').value = 0;
+                } else if(drugVal === 'other') {
+                    if (!document.getElementById('targetDose').value) {
+                        document.getElementById('targetDose').value = 0;
+                    }
                 }
             }
 
@@ -431,27 +441,46 @@
 
         function handleDrugSelect() {
             const key = document.getElementById('drugSelect').value;
-            if (key !== 'other' && DRUG_PRESETS[key]) {
-                const p = DRUG_PRESETS[key];
-                
+            const customContainer = document.getElementById('customDrugContainer');
+
+            if (key === 'other') {
+                if (customContainer) customContainer.classList.remove('hidden');
                 if (appState.mode === 'tapering') {
-                    document.getElementById('currentDose').value = p.target;
-                    document.getElementById('targetDose').value = 0;
-                } else {
-                    document.getElementById('currentDose').value = p.dose;
-                    document.getElementById('targetDose').value = p.target;
+                    if (!document.getElementById('targetDose').value) {
+                        document.getElementById('targetDose').value = 0;
+                    }
                 }
-                
-                document.getElementById('stepAmount').value = p.step;
-                document.getElementById('frequency').value = p.freq;
+            } else {
+                if (customContainer) customContainer.classList.add('hidden');
+                if (DRUG_PRESETS[key]) {
+                    const p = DRUG_PRESETS[key];
+                    if (appState.mode === 'tapering') {
+                        document.getElementById('currentDose').value = p.target;
+                        document.getElementById('targetDose').value = 0;
+                    } else {
+                        document.getElementById('currentDose').value = p.dose;
+                        document.getElementById('targetDose').value = p.target;
+                    }
+                    document.getElementById('stepAmount').value = p.step;
+                    document.getElementById('frequency').value = p.freq;
+                }
             }
             if (appState.mode === 'titration') renderSideEffects(key);
         }
 
         function generateSchedule() {
             const drugKey = document.getElementById('drugSelect').value;
-            const drugName = document.getElementById('drugSelect').options[document.getElementById('drugSelect').selectedIndex].text;
-            const drugNameAr = DRUG_PRESETS[drugKey]?.nameAr || drugName.split('(')[0];
+            if (!drugKey) { alert("Please select a medication."); return; }
+
+            let drugNameAr = '';
+            if (drugKey === 'other') {
+                const custom = document.getElementById('customDrugName').value.trim();
+                drugNameAr = custom || 'دواء آخر';
+            } else {
+                const drugName = document.getElementById('drugSelect').options[document.getElementById('drugSelect').selectedIndex].text;
+                const baseNameAr = DRUG_PRESETS[drugKey]?.nameAr || drugName.split('(')[0];
+                drugNameAr = `${baseNameAr} (${drugName.split('(')[0].trim()})`;
+            }
 
             let currentSingleDose = parseFloat(document.getElementById('currentDose').value) || 0;
             const targetSingleDose = parseFloat(document.getElementById('targetDose').value) || 0;
@@ -495,11 +524,15 @@
                 document.getElementById('finalInstructionBox').style.display = 'block'; 
             }
 
-            document.getElementById('outDrug').innerText = `${drugNameAr} (${drugName.split('(')[0].trim()})`;
+            document.getElementById('outDrug').innerText = drugNameAr;
             document.getElementById('outPatientNamePrint').innerText = appState.name;
 
-            const isMonthly = (frequency === '1 Month');
-            let weeksPerStep = (frequency === '2 Weeks') ? 2 : 1;
+            const isMonthUnit = (frequency === '1 Month' || frequency === '2 Months');
+            let timeUnitsPerStep = 1;
+            if (frequency === '2 Weeks' || frequency === '2 Months') {
+                timeUnitsPerStep = 2;
+            }
+
             const showAM = (scheduleType === 'BID' || scheduleType === 'OD_AM');
             const showPM = (scheduleType === 'BID' || scheduleType === 'OD_PM');
 
@@ -507,7 +540,7 @@
             if (showAM) headerHtml += '<div class="flex-1 text-center">الصباح ☀️</div>';
             if (showAM && showPM) headerHtml += '<div class="w-px"></div>';
             if (showPM) headerHtml += '<div class="flex-1 text-center">المساء 🌙</div>';
-            headerHtml += `<div class="w-1/4 text-right">${isMonthly ? 'الشهر' : 'الأسبوع'}</div>`;
+            headerHtml += `<div class="w-1/4 text-right">${isMonthUnit ? 'الشهر' : 'الأسبوع'}</div>`;
             document.getElementById('tableHeader').innerHTML = headerHtml;
 
             const container = document.getElementById('rowsContainer');
@@ -525,7 +558,7 @@
                     else { am = currDose; pm = currDose; }
 
                     const isTarget = (currDose >= targetSingleDose);
-                    const duration = (isMonthly || isTarget) ? 1 : weeksPerStep;
+                    const duration = isTarget ? 1 : timeUnitsPerStep;
                     steps.push({ am: am, pm: pm, duration: duration });
 
                     if (isTarget) break;
@@ -535,14 +568,14 @@
                 }
             } else {
                 // Tapering logic
-                const loopsPerStep = isMonthly ? 1 : weeksPerStep;
+                const loopsPerStep = timeUnitsPerStep;
                 let currDose = currentSingleDose - stepPerDose;
                 if (currDose < targetSingleDose) currDose = targetSingleDose;
 
                 let safety = 0;
                 let lastActiveDose = currDose;
 
-                while (currDose > targetSingleDose && safety < 50) {
+                while (((targetSingleDose === 0 && currDose > 0) || (targetSingleDose > 0 && currDose >= targetSingleDose)) && safety < 50) {
                     lastActiveDose = currDose;
                     let am = 0, pm = 0;
                     if (scheduleType === 'OD_AM') { am = currDose; pm = 0; }
@@ -591,7 +624,7 @@
                         </div>`;
                     }
 
-                    const periodLabel = isMonthly ? `الشهر ${timeCount}` : `الأسبوع ${timeCount}`;
+                    const periodLabel = isMonthUnit ? `الشهر ${timeCount}` : `الأسبوع ${timeCount}`;
                     rowInner += `
                     <div class="w-1/4 text-right pl-2 border-l-2 border-slate-100 ml-2">
                         <div class="text-base font-black text-slate-800 font-arabic">${periodLabel}</div>
@@ -637,7 +670,7 @@
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sharing';
             try {
-                const canvas = await  html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true });
+                const canvas = await html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true });
                 canvas.toBlob(async (blob) => {
                     if (!blob) { alert("Error generating image."); btn.innerHTML = originalText; return; }
                     const file = new File([blob], `Schedule-${appState.name}.png`, { type: "image/png" });
