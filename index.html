@@ -274,9 +274,8 @@
                         </div>
 
                         <div class="bg-slate-900 text-white p-5 text-center">
-                            <h3 class="text-xl font-bold font-arabic mb-2 dir-ltr">
-                                للحصول على مساعدة طبية أثناء فترة العلاج، اتصل على: <br>
-                                <a href="tel:920012312" class="block mt-1 hover:text-indigo-300 transition-colors">920012312</a>
+                            <h3 class="text-base font-bold font-arabic mb-2">
+                                للمساعده ارفع تذكرة للتواصل مع الطبيب المعالج
                             </h3>
                             <div class="w-12 h-1 bg-indigo-500 mx-auto mb-3 rounded-full"></div>
                             <p class="text-sm font-bold text-white font-arabic">هذه التعليمات تحت إشراف د. فوزي أحمد بابطين</p>
@@ -466,15 +465,10 @@
                 stepPerDose = Math.abs(stepPerDose); 
             } else {
                 if (currentSingleDose <= targetSingleDose) { alert("For Tapering, Target Dose must be LOWER than Start Dose."); return; }
-                stepPerDose = -Math.abs(stepPerDose); 
+                stepPerDose = Math.abs(stepPerDose); 
             }
             if (currentSingleDose < 0 || targetSingleDose < 0) { alert("Doses cannot be negative."); return; }
-
-            // TAPERING LOGIC
-            if (appState.mode === 'tapering') {
-                currentSingleDose += stepPerDose; 
-                if (currentSingleDose < 0) currentSingleDose = 0;
-            }
+            if (stepPerDose <= 0) { alert("Step amount must be greater than 0."); return; }
 
             document.getElementById('preview-area').classList.remove('hidden');
             
@@ -519,52 +513,82 @@
             const container = document.getElementById('rowsContainer');
             container.innerHTML = '';
             
+            const steps = [];
+
+            if (appState.mode === 'titration') {
+                let currDose = currentSingleDose;
+                let safety = 0;
+                while (safety < 50) {
+                    let am = 0, pm = 0;
+                    if (scheduleType === 'OD_AM') { am = currDose; pm = 0; }
+                    else if (scheduleType === 'OD_PM') { am = 0; pm = currDose; }
+                    else { am = currDose; pm = currDose; }
+
+                    const isTarget = (currDose >= targetSingleDose);
+                    const duration = (isMonthly || isTarget) ? 1 : weeksPerStep;
+                    steps.push({ am: am, pm: pm, duration: duration });
+
+                    if (isTarget) break;
+                    currDose += stepPerDose;
+                    if (currDose > targetSingleDose) currDose = targetSingleDose;
+                    safety++;
+                }
+            } else {
+                // Tapering logic
+                const loopsPerStep = isMonthly ? 1 : weeksPerStep;
+                let currDose = currentSingleDose - stepPerDose;
+                if (currDose < targetSingleDose) currDose = targetSingleDose;
+
+                let safety = 0;
+                let lastActiveDose = currDose;
+
+                while (currDose > targetSingleDose && safety < 50) {
+                    lastActiveDose = currDose;
+                    let am = 0, pm = 0;
+                    if (scheduleType === 'OD_AM') { am = currDose; pm = 0; }
+                    else if (scheduleType === 'OD_PM') { am = 0; pm = currDose; }
+                    else { am = currDose; pm = currDose; }
+
+                    steps.push({ am: am, pm: pm, duration: loopsPerStep });
+
+                    currDose -= stepPerDose;
+                    safety++;
+                }
+
+                // If tapering to 0, include final step to be PM only
+                if (targetSingleDose === 0) {
+                    if (scheduleType === 'BID' || scheduleType === 'OD_AM') {
+                        const finalPmDose = lastActiveDose > 0 ? lastActiveDose : stepPerDose;
+                        steps.push({ am: 0, pm: finalPmDose, duration: loopsPerStep });
+                    }
+                }
+            }
+
             let timeCount = 1;
-            let safetyBreak = 0;
-            let done = false;
-
-            while (!done && safetyBreak < 50) {
-                let am = 0, pm = 0;
-                if (scheduleType === 'OD_AM') { am = currentSingleDose; pm = 0; }
-                else if (scheduleType === 'OD_PM') { am = 0; pm = currentSingleDose; }
-                else { am = currentSingleDose; pm = currentSingleDose; }
-
+            steps.forEach(step => {
+                const am = step.am;
+                const pm = step.pm;
                 const amPills = getPillText(am, tabStrength);
                 const pmPills = getPillText(pm, tabStrength);
 
-                const isTargetDose = (appState.mode === 'titration') ? (currentSingleDose >= targetSingleDose) : (currentSingleDose <= targetSingleDose);
-                if (isTargetDose) { currentSingleDose = targetSingleDose; done = true; }
-
-                const loopsToDo = (isMonthly || isTargetDose) ? 1 : weeksPerStep;
-
-                for (let i = 0; i < loopsToDo; i++) {
+                for (let i = 0; i < step.duration; i++) {
                     let rowInner = '';
-                    
-                    // -- NEW LOGIC: Tapering Check for Last Step --
-                    if (appState.mode === 'tapering' && currentSingleDose === 0) {
-                        rowInner = `
-                            <div class="flex-1 text-center bg-blue-50 text-blue-700 font-bold text-xl py-3 rounded-lg border border-blue-100 font-arabic mx-2 shadow-sm">
-                                يتم إيقاف العلاج
-                            </div>
-                        `;
-                    } else {
-                        if (showAM) {
-                            rowInner += `
-                            <div class="flex-1 text-center ${am === 0 ? 'opacity-20' : ''}">
-                                <div class="text-lg font-black text-slate-800">${am} ملجم</div>
-                                ${amPills ? `<div class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${amPills}</div>` : ''}
-                            </div>`;
-                        }
-                        if (showAM && showPM) {
-                            rowInner += `<div class="w-px h-10 bg-slate-200"></div>`;
-                        }
-                        if (showPM) {
-                            rowInner += `
-                            <div class="flex-1 text-center ${pm === 0 ? 'opacity-20' : ''}">
-                                <div class="text-lg font-black text-slate-800">${pm} ملجم</div>
-                                ${pmPills ? `<div class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${pmPills}</div>` : ''}
-                            </div>`;
-                        }
+                    if (showAM) {
+                        rowInner += `
+                        <div class="flex-1 text-center ${am === 0 ? 'opacity-30' : ''}">
+                            <div class="text-lg font-black text-slate-800">${am > 0 ? `${am} ملجم` : '-'}</div>
+                            ${amPills ? `<div class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${amPills}</div>` : ''}
+                        </div>`;
+                    }
+                    if (showAM && showPM) {
+                        rowInner += `<div class="w-px h-10 bg-slate-200"></div>`;
+                    }
+                    if (showPM) {
+                        rowInner += `
+                        <div class="flex-1 text-center ${pm === 0 ? 'opacity-30' : ''}">
+                            <div class="text-lg font-black text-slate-800">${pm > 0 ? `${pm} ملجم` : '-'}</div>
+                            ${pmPills ? `<div class="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full inline-block font-arabic font-bold mt-1">${pmPills}</div>` : ''}
+                        </div>`;
                     }
 
                     const periodLabel = isMonthly ? `الشهر ${timeCount}` : `الأسبوع ${timeCount}`;
@@ -577,14 +601,7 @@
                     container.innerHTML += rowHtml;
                     timeCount++;
                 }
-
-                if (!done) {
-                    currentSingleDose += stepPerDose;
-                    if (appState.mode === 'titration' && currentSingleDose >= targetSingleDose) currentSingleDose = targetSingleDose;
-                    if (appState.mode === 'tapering' && currentSingleDose <= targetSingleDose) currentSingleDose = targetSingleDose;
-                }
-                safetyBreak++;
-            }
+            });
             
             // Auto Scroll to Top
             setTimeout(() => {
@@ -620,7 +637,7 @@
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sharing';
             try {
-                const canvas = await html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true });
+                const canvas = await  html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true });
                 canvas.toBlob(async (blob) => {
                     if (!blob) { alert("Error generating image."); btn.innerHTML = originalText; return; }
                     const file = new File([blob], `Schedule-${appState.name}.png`, { type: "image/png" });
