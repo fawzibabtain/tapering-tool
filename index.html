@@ -3,34 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Medication Titration & Tapering | Epilepsy Documentation Hub</title>
+    <title>Epilepsy Hub | Medication Titration & Tapering Tool</title>
     
     <!-- External CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Standalone Client-Side QR Code Engine (No Server API Needed) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --brand-1: #014d1a;
             --brand-2: #027a2a;
             --brand-light: #e8f5e9;
-            --headerH: 76px;
+            --headerH: 70px;
         }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        html, body {
             background-color: #f8fafc;
             -webkit-tap-highlight-color: transparent;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
         }
 
         .font-arabic { font-family: 'Cairo', sans-serif; }
         input, select, textarea { font-size: 15px !important; }
 
-        /* Fixed App Header matching index.html */
+        /* Fixed App Header */
         #hub-header {
             background: var(--brand-1);
             color: #ffffff;
@@ -41,27 +43,7 @@
             z-index: 1050;
         }
 
-        .header-home-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #ffffff;
-            padding: 7px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 600;
-            font-size: 13px;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-        .header-home-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            color: #ffffff;
-        }
-
-        /* Print Styles */
+        /* Print formatting */
         @media print {
             @page { size: A4; margin: 0; }
             body, html { height: 100%; margin: 0; padding: 0; background: white; }
@@ -69,11 +51,11 @@
             .no-print { display: none !important; }
             
             #infographic-container {
-                visibility: visible;
-                position: absolute;
-                left: 0; top: 0;
+                visibility: visible !important;
+                position: absolute !important;
+                left: 0 !important; top: 0 !important;
                 width: 100% !important;
-                transform: scale(0.86);
+                transform: scale(0.85);
                 transform-origin: top center;
                 margin-top: 15px;
                 box-shadow: none !important;
@@ -81,55 +63,84 @@
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
-            #infographic-container * { visibility: visible; }
+            #infographic-container * { visibility: visible !important; }
         }
-
-        /* Subtle scrollbars */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 
-<body class="text-slate-800 min-h-screen flex flex-col pt-[76px]">
+<body class="text-slate-800 pt-[70px]">
 
-    <!-- ================= FIXED GREEN HEADER (Matching index.html) ================= -->
+    <!-- ================= FIXED APP HEADER (SOLO APP - NO HOME BUTTON) ================= -->
     <header id="hub-header" class="no-print flex items-center justify-between px-4 md:px-8">
-        <div class="flex items-center gap-2">
-            <a href="index.html" class="header-home-btn" title="Back to Epilepsy Hub">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                <span class="hidden sm:inline">Home</span>
-            </a>
-            <button onclick="goBackToLanding()" id="navBackBtn" class="hidden text-xs font-semibold bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded-lg border border-white/20 transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-arrow-left"></i> Patient Select
-            </button>
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-white text-lg shadow-inner">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <div>
+                <span class="text-xs md:text-sm font-black tracking-wider text-emerald-300 uppercase">Epilepsy Hub</span>
+                <h1 class="text-xs md:text-sm font-bold text-white leading-tight">Medication Titration & Tapering</h1>
+            </div>
         </div>
 
-        <div class="text-center px-2">
-            <h1 class="text-sm md:text-lg font-bold text-white tracking-tight">Medication Titration & Tapering Suite</h1>
-            <p class="text-[10px] md:text-xs text-emerald-200/90 font-medium">Dr. Fawzi Babtain • KFSHRC-J Epilepsy Program</p>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <span class="hidden md:inline-block text-[11px] font-bold bg-white/15 px-3 py-1 rounded-full text-emerald-100 border border-emerald-400/30">
-                Patient Portal Tool
-            </span>
+        <div class="text-right">
+            <p class="text-[11px] md:text-xs text-white font-bold">Dr. Fawzi Babtain</p>
+            <p class="text-[9px] md:text-[10px] text-emerald-200/90 font-medium hidden sm:block">Consultant Neurologist & Epileptologist</p>
         </div>
     </header>
 
-    <!-- ================= MAIN SCROLLER ================= -->
-    <main id="main-scroller" class="flex-1 w-full bg-slate-50">
+    <!-- ================= 1. PATIENT MOBILE VIEW (LAUNCHED ON QR CODE SCAN) ================= -->
+    <div id="patient-phone-view" class="hidden min-h-[calc(100vh-70px)] bg-slate-900 text-white p-4 md:p-6 flex flex-col items-center">
+        <div class="max-w-md w-full space-y-4">
+            
+            <div class="text-center space-y-1 pt-2">
+                <span class="inline-block bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full">
+                    <i class="fa-solid fa-circle-check mr-1"></i> جدول معتمد من الطبيب المعالج
+                </span>
+                <h2 class="text-xl font-bold font-arabic">جدول تنظيم جرعات الدواء</h2>
+                <p class="text-xs text-slate-300 font-arabic">لحفظ الجدول في ألبوم صور هاتفك (استوديو الصور):</p>
+            </div>
 
-        <!-- STEP 1: PATIENT IDENTITY & MODE LANDING -->
-        <div id="view-landing" class="min-h-[calc(100vh-76px)] bg-slate-900 text-white p-6 flex flex-col justify-center items-center transition-all duration-300">
-            <div class="w-full max-w-md space-y-6">
+            <!-- NATIVE PHOTO LIBRARY SAVER BUTTON -->
+            <button onclick="savePatientImageToPhotos()" id="btnSaveToStudio" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 px-5 rounded-2xl shadow-xl flex items-center justify-center gap-2 text-base font-arabic active:scale-95 transition-all">
+                <i class="fa-solid fa-download text-lg"></i> حفظ في ألبوم الصور (Studio / Photos)
+            </button>
+
+            <!-- Status Indicator -->
+            <div id="patient-render-status" class="text-center text-xs text-emerald-400 font-arabic flex items-center justify-center gap-2 py-1">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> جاري تجهيز الصورة عالية الدقة...
+            </div>
+
+            <!-- Native Rendered Image (Enables 1-Tap & Long-Press Native iOS Save) -->
+            <div class="bg-white rounded-2xl p-2 shadow-2xl border border-white/10 text-slate-900 overflow-hidden">
+                <img id="patient-pre-rendered-img" class="w-full h-auto rounded-xl hidden shadow" alt="جدول تنظيم جرعات العلاج">
                 
+                <!-- Fallback Container while Image is rendering -->
+                <div id="patient-infographic-slot" class="rounded-xl overflow-hidden"></div>
+            </div>
+
+            <div class="bg-slate-800/80 border border-slate-700 p-3 rounded-xl text-center space-y-1">
+                <p class="text-xs text-amber-300 font-bold font-arabic">
+                    💡 طريقة بديلة وسريعة لأجهزة iPhone و Android:
+                </p>
+                <p class="text-[11px] text-slate-300 font-arabic">
+                    المس الصورة أعلاه مطولاً (Long-Press) ثم اختر <strong>"إضافة إلى الصور / Add to Photos"</strong>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 2. DOCTOR WORKSPACE ================= -->
+    <div id="doctor-workspace">
+
+        <!-- STEP 1: PATIENT IDENTITY LANDING -->
+        <div id="view-landing" class="min-h-[calc(100vh-70px)] bg-slate-900 text-white p-6 flex flex-col justify-center items-center">
+            <div class="w-full max-w-md space-y-6">
                 <div class="text-center space-y-3">
                     <div class="w-16 h-16 rounded-2xl bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center mx-auto text-emerald-400 shadow-xl shadow-emerald-950/40">
                         <i class="fa-solid fa-prescription-bottle-medical text-3xl"></i>
                     </div>
                     <h2 class="text-2xl font-black tracking-tight text-white">Precision Titration & Tapering</h2>
-                    <p class="text-slate-400 text-xs font-medium">Generate customized schedules, patient infographics, and smart QR passes.</p>
+                    <p class="text-slate-400 text-xs font-medium">Create customized schedules, patient infographics, and instant camera QR passes.</p>
                 </div>
 
                 <div class="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-2xl space-y-4">
@@ -137,10 +148,10 @@
                         <i class="fa-solid fa-hospital-user"></i> Patient Identification
                     </label>
                     <div>
-                        <input type="text" id="landingName" class="w-full p-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all text-center font-bold" placeholder="Patient Full Name / اسم المريض">
+                        <input type="text" id="landingName" class="w-full p-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-center font-bold" placeholder="Patient Full Name / اسم المريض">
                     </div>
                     <div>
-                        <select id="landingGender" class="w-full p-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all text-center font-medium">
+                        <select id="landingGender" class="w-full p-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all text-center font-medium">
                             <option value="male">Male (ذكر)</option>
                             <option value="female">Female (أنثى)</option>
                         </select>
@@ -151,7 +162,7 @@
                     <button id="btn-titration" onclick="selectMode('titration')" class="w-full bg-emerald-700 hover:bg-emerald-600 active:scale-[0.99] text-white font-bold py-4 px-5 rounded-2xl shadow-lg border border-emerald-500/40 transition-all flex items-center justify-between">
                         <div class="text-left">
                             <span class="block text-base font-bold">Medication Titration</span>
-                            <span class="text-[10px] text-emerald-200 uppercase tracking-wider">Start New Drug / Escalate Dose</span>
+                            <span class="text-[10px] text-emerald-200 uppercase tracking-wider">Start Drug / Escalate Dose (تصعيد الجرعة)</span>
                         </div>
                         <i class="fa-solid fa-arrow-trend-up text-2xl text-emerald-300"></i>
                     </button>
@@ -159,17 +170,16 @@
                     <button id="btn-tapering" onclick="selectMode('tapering')" class="w-full bg-slate-800 hover:bg-slate-700 active:scale-[0.99] text-white font-bold py-4 px-5 rounded-2xl shadow-lg border border-slate-700 transition-all flex items-center justify-between">
                         <div class="text-left">
                             <span class="block text-base font-bold">Medication Tapering</span>
-                            <span class="text-[10px] text-slate-400 uppercase tracking-wider">Wean Off / Safe Discontinuation</span>
+                            <span class="text-[10px] text-slate-400 uppercase tracking-wider">Wean Off / Discontinue (سحب وتخفيض الجرعة)</span>
                         </div>
                         <i class="fa-solid fa-arrow-trend-down text-2xl text-amber-400"></i>
                     </button>
                 </div>
-
             </div>
         </div>
 
-        <!-- STEP 2: SPLIT WORKSPACE (TOOL ON LEFT, QR ON RIGHT ON DESKTOP) -->
-        <div id="view-tool" class="hidden min-h-[calc(100vh-76px)] p-4 md:p-8 max-w-7xl mx-auto">
+        <!-- STEP 2: DUAL-COLUMN LAYOUT -->
+        <div id="view-tool" class="hidden min-h-[calc(100vh-70px)] p-4 md:p-8 max-w-7xl mx-auto">
             
             <!-- Patient Mini Bar -->
             <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap justify-between items-center mb-6">
@@ -188,23 +198,22 @@
                         <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Mode</span>
                         <span class="font-bold text-xs md:text-sm px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" id="displayMode">-</span>
                     </div>
-                    <button onclick="goBackToLanding()" class="text-slate-400 hover:text-slate-600 text-xs font-semibold px-2 py-1 rounded border border-slate-200 hover:bg-slate-50 transition-colors">
-                        Change
+                    <button onclick="goBackToLanding()" class="text-slate-500 hover:text-slate-800 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Change Patient
                     </button>
                 </div>
             </div>
 
-            <!-- Responsive Layout Grid: Left (Form & Preview) | Right (QR Pass) -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Dual-Column Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
                 
-                <!-- LEFT COLUMN: Form & Schedule Infographic (lg:col-span-7) -->
+                <!-- ================= LEFT COLUMN: PARAMETERS & SCHEDULE TABLE ================= -->
                 <div class="lg:col-span-7 space-y-6">
                     
-                    <!-- Clinical Configuration Card -->
                     <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200 shadow-sm">
                         <div class="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
                             <i class="fa-solid fa-sliders text-emerald-700"></i>
-                            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wide">Dosage & Schedule Parameters</h3>
+                            <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wide">1. Dose & Titration Parameters</h3>
                         </div>
 
                         <form id="taper-form" class="space-y-4" onsubmit="event.preventDefault(); generateSchedule();">
@@ -232,7 +241,7 @@
 
                             <div class="grid grid-cols-2 gap-4 pt-2">
                                 <div class="col-span-2">
-                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" id="lblCurrentDose">Current Single Dose (mg)</label>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1" id="lblCurrentDose">Current Dose (mg)</label>
                                     <input type="number" id="currentDose" class="w-full p-3 border border-slate-300 rounded-xl font-black text-xl text-slate-900 focus:ring-2 focus:ring-emerald-600 outline-none transition-colors" placeholder="0">
                                     <p class="text-[10px] text-slate-400 mt-1">Starting single dose per intake</p>
                                 </div>
@@ -259,7 +268,7 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Frequency</label>
+                                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Dosing Schedule</label>
                                     <select id="scheduleType" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-emerald-600">
                                         <option value="BID">BID (Twice Daily - AM/PM)</option>
                                         <option value="OD_PM">OD (Once Daily at Night / مساءً)</option>
@@ -269,12 +278,11 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Tablet Strength <span class="font-normal text-slate-400">(Optional for pill count)</span></label>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-1">Tablet Strength <span class="font-normal text-slate-400">(Optional for automatic pill count)</span></label>
                                 <input type="number" id="tabStrength" class="w-full p-3 border border-slate-200 rounded-xl placeholder-slate-300 outline-none focus:ring-2 focus:ring-emerald-600" placeholder="e.g., 25, 50, 500 mg">
                             </div>
                         </form>
 
-                        <!-- Side Effects for Titration Mode -->
                         <div id="se-section" class="mt-5 pt-4 border-t border-slate-100">
                             <label class="block text-xs font-bold text-slate-600 uppercase tracking-wide mb-2 flex items-center justify-between">
                                 <span>Patient Counseling & Side Effects</span>
@@ -285,18 +293,23 @@
                             </div>
                         </div>
 
-                        <!-- Action Button -->
                         <div class="mt-6">
                             <button onclick="generateSchedule()" class="w-full bg-[#014d1a] hover:bg-[#027a2a] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-emerald-950/20 active:scale-[0.99] transition-all flex justify-center items-center gap-2 text-base">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Schedule & QR Code
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Schedule & Prepare Barcode
                             </button>
                         </div>
                     </div>
 
-                    <!-- PREVIEW & INFOGRAPHIC AREA (LEFT COLUMN) -->
+                    <!-- PREVIEW & INFOGRAPHIC AREA (DOCTOR INSPECTION) -->
                     <div id="preview-area" class="hidden space-y-4">
-                        
-                        <!-- Toolbar -->
+                        <div class="bg-emerald-50 border-2 border-emerald-500/30 p-3.5 rounded-xl flex items-center gap-3 text-emerald-950">
+                            <i class="fa-solid fa-circle-check text-emerald-700 text-xl flex-shrink-0"></i>
+                            <div class="text-xs">
+                                <strong class="block text-sm font-bold">2. Review & Verify the Schedule Below:</strong>
+                                Scroll through each week to verify the AM/PM doses and warnings before asking the patient to scan the pass on the right.
+                            </div>
+                        </div>
+
                         <div id="toolbar" class="flex flex-wrap justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm no-print gap-2">
                             <h3 class="font-bold text-slate-600 text-xs uppercase tracking-wider flex items-center gap-2">
                                 <i class="fa-regular fa-file-lines text-emerald-700"></i> Schedule Preview
@@ -314,97 +327,98 @@
                             </div>
                         </div>
 
-                        <!-- Rendered Arabic Patient Infographic -->
-                        <div id="infographic-container" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200" dir="rtl">
-                            
-                            <div class="bg-gradient-to-l from-emerald-950 via-[#014d1a] to-emerald-900 text-white p-6 text-center relative overflow-hidden">
-                                <div class="relative z-10">
-                                    <h2 class="text-base md:text-lg font-bold font-arabic leading-relaxed mb-2" id="outHeader"></h2>
-                                    <div class="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-5 py-1 rounded-full mt-1">
-                                        <span class="text-lg md:text-xl font-extrabold text-white font-arabic" id="outDrug"></span>
-                                    </div>
-                                </div>
-                                <p class="text-[9px] text-emerald-200 mt-2 print:block hidden font-bold uppercase tracking-widest" id="outPatientNamePrint"></p>
-                            </div>
-
-                            <div class="bg-emerald-50 border-b border-emerald-100 p-3 text-center">
-                                <div class="flex items-center justify-center gap-2 text-emerald-950 font-bold text-sm md:text-base font-arabic">
-                                    <span>ابدأ هذا الجدول يوم الأحد القادم</span>
-                                    <i class="fa-regular fa-calendar-check text-base"></i>
-                                </div>
-                            </div>
-
-                            <div class="p-4 md:p-6">
-                                <div id="tableHeader" class="flex justify-between items-center text-xs md:text-sm font-black text-slate-800 mb-3 px-2 border-b-2 border-slate-200 pb-2"></div>
-                                <div id="rowsContainer" class="space-y-2"></div>
+                        <div id="doctor-infographic-slot">
+                            <!-- ================= INFOGRAPHIC CARD ================= -->
+                            <div id="infographic-container" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200" dir="rtl">
                                 
-                                <div id="finalInstructionBox" class="mt-5 bg-emerald-50/50 border border-emerald-200 rounded-xl p-3.5 text-center">
-                                    <p class="text-emerald-950 font-bold font-arabic text-base">
-                                        استمر على الجرعة الأخيرة حتى موعدك القادم
-                                    </p>
+                                <div class="bg-gradient-to-l from-emerald-950 via-[#014d1a] to-emerald-900 text-white p-6 text-center relative overflow-hidden">
+                                    <div class="relative z-10">
+                                        <h2 class="text-base md:text-lg font-bold font-arabic leading-relaxed mb-2" id="outHeader"></h2>
+                                        <div class="inline-block bg-white/10 backdrop-blur-md border border-white/20 px-5 py-1 rounded-full mt-1">
+                                            <span class="text-lg md:text-xl font-extrabold text-white font-arabic" id="outDrug"></span>
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] text-emerald-200 mt-2 print:block hidden font-bold uppercase tracking-widest" id="outPatientNamePrint"></p>
                                 </div>
-                            </div>
 
-                            <div class="bg-slate-50 border-t border-slate-200 p-5">
-                                <div class="flex flex-row items-start gap-3 text-right">
-                                    <div class="text-amber-500 text-lg mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                                    <div class="flex-1">
-                                        <h4 class="font-bold text-slate-800 text-sm mb-1 font-arabic">تعليمات وإرشادات مهمة</h4>
-                                        <div id="outSideEffects" class="text-xs text-slate-600 font-arabic leading-relaxed">-</div>
+                                <div class="bg-emerald-50 border-b border-emerald-100 p-3 text-center">
+                                    <div class="flex items-center justify-center gap-2 text-emerald-950 font-bold text-sm md:text-base font-arabic">
+                                        <span>ابدأ هذا الجدول يوم الأحد القادم</span>
+                                        <i class="fa-regular fa-calendar-check text-base"></i>
                                     </div>
                                 </div>
-                                <div class="mt-3 text-center" id="disclaimerBox"></div>
-                            </div>
 
-                            <div class="bg-slate-900 text-white p-4 text-center">
-                                <h3 class="text-xs md:text-sm font-bold font-arabic mb-1">
-                                    للمساعدة ارفع تذكرة عبر بوابة المريض للتواصل مع الطبيب المعالج
-                                </h3>
-                                <p class="text-xs font-bold text-emerald-400 font-arabic">هذه التعليمات تحت إشراف د. فوزي أحمد بابطين</p>
-                                <p class="text-[9px] text-slate-400 font-arabic">KFSHRC – Jeddah • Comprehensive Epilepsy Center</p>
+                                <div class="p-4 md:p-6">
+                                    <div id="tableHeader" class="flex justify-between items-center text-xs md:text-sm font-black text-slate-800 mb-3 px-2 border-b-2 border-slate-200 pb-2"></div>
+                                    <div id="rowsContainer" class="space-y-2"></div>
+                                    
+                                    <div id="finalInstructionBox" class="mt-5 bg-emerald-50/50 border border-emerald-200 rounded-xl p-3.5 text-center">
+                                        <p class="text-emerald-950 font-bold font-arabic text-base">
+                                            استمر على الجرعة الأخيرة حتى موعدك القادم
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-50 border-t border-slate-200 p-5">
+                                    <div class="flex flex-row items-start gap-3 text-right">
+                                        <div class="text-amber-500 text-lg mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                        <div class="flex-1">
+                                            <h4 class="font-bold text-slate-800 text-sm mb-1 font-arabic">تعليمات وإرشادات مهمة</h4>
+                                            <div id="outSideEffects" class="text-xs text-slate-600 font-arabic leading-relaxed">-</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-center" id="disclaimerBox"></div>
+                                </div>
+
+                                <!-- BLACK BOX FOOTER (CLEAN: ONLY INCLUDES SUPERVISED STATEMENT) -->
+                                <div class="bg-slate-900 text-white p-4 text-center">
+                                    <p class="text-sm font-bold text-white font-arabic">هذه التعليمات تحت إشراف د. فوزي أحمد بابطين</p>
+                                </div>
                             </div>
                         </div>
 
                     </div>
                 </div>
 
-                <!-- RIGHT COLUMN: DEDICATED SMART QR CODE PASS (lg:col-span-5) -->
-                <div class="lg:col-span-5 space-y-4">
-                    
-                    <div id="qr-side-card" class="bg-white rounded-2xl border border-slate-200 shadow-md p-6 sticky top-24 transition-all">
+                <!-- ================= RIGHT COLUMN: FIXED STICKY BARCODE PASS ================= -->
+                <div class="lg:col-span-5 sticky top-[85px] self-start z-30">
+                    <div id="qr-side-card" class="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 transition-all">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm">
                                     <i class="fa-solid fa-qrcode"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-slate-800 text-sm">Digital Schedule Pass</h4>
-                                    <p class="text-[10px] text-slate-400">Offline Camera Scan & Import</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">3. Patient Studio Barcode</h4>
+                                    <p class="text-[10px] text-slate-400">Fixed Pass: Stays visible while scrolling</p>
                                 </div>
                             </div>
-                            <span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full uppercase">Instant</span>
+                            <span id="qrStatusBadge" class="text-[10px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-full uppercase">Waiting</span>
                         </div>
 
-                        <!-- QR Code Canvas Display -->
                         <div class="bg-gradient-to-b from-slate-50 to-slate-100/60 p-5 rounded-2xl border border-slate-200 flex flex-col items-center justify-center text-center">
                             
                             <div id="qr-placeholder" class="py-12 px-4 text-slate-400 flex flex-col items-center justify-center">
                                 <i class="fa-solid fa-qrcode text-5xl mb-3 text-slate-300"></i>
-                                <p class="text-xs font-semibold text-slate-500">QR Code will generate automatically</p>
-                                <p class="text-[10px] text-slate-400 mt-1 max-w-[200px]">Fill the parameters and click "Generate Schedule"</p>
+                                <p class="text-xs font-semibold text-slate-600">Barcode will generate here</p>
+                                <p class="text-[10px] text-slate-400 mt-1 max-w-[210px]">Fill the doses on the left and click "Generate Schedule & Prepare Barcode"</p>
                             </div>
 
                             <div id="qr-code-wrapper" class="hidden flex-col items-center">
                                 <div id="qrcode-box" class="p-3 bg-white rounded-xl shadow-md border border-slate-200 inline-block"></div>
-                                <div class="mt-3 flex items-center gap-2 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                                
+                                <div class="mt-3 flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200">
                                     <i class="fa-solid fa-camera"></i>
-                                    <span>Point iPhone or Android Camera to Scan</span>
+                                    <span>Point iPhone or Android Camera</span>
                                 </div>
+
+                                <p class="text-[11px] text-slate-500 mt-2 font-medium">
+                                    Directs phone to the complete graphic with instant save to Photos
+                                </p>
                             </div>
                         </div>
 
-                        <!-- Medication Details Summary in Pass -->
-                        <div id="qr-meta-box" class="hidden mt-4 space-y-2.5 text-xs border-t border-slate-100 pt-3">
+                        <div id="qr-meta-box" class="hidden mt-4 space-y-2 text-xs border-t border-slate-100 pt-3">
                             <div class="flex justify-between text-slate-500">
                                 <span>Patient:</span>
                                 <strong class="text-slate-800" id="qrMetaPatient">-</strong>
@@ -415,7 +429,7 @@
                             </div>
                             <div class="flex justify-between text-slate-500">
                                 <span>Target Regimen:</span>
-                                <strong class="text-emerald-700" id="qrMetaRegimen">-</strong>
+                                <strong class="text-emerald-700 font-bold" id="qrMetaRegimen">-</strong>
                             </div>
                             <div class="flex justify-between text-slate-500">
                                 <span>Total Duration:</span>
@@ -423,31 +437,29 @@
                             </div>
                         </div>
 
-                        <!-- Action helper -->
-                        <div class="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
-                            <button onclick="copySchedulePayload()" id="btnCopyPayload" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
-                                <i class="fa-regular fa-copy"></i> Copy Encoded Payload
+                        <div id="qrActionButtons" class="hidden mt-4 pt-3 border-t border-slate-100 flex flex-col gap-2">
+                            <a id="btnTestPatientLink" href="#" target="_blank" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Test Patient Scan View (Open in Tab)
+                            </a>
+                            <button onclick="copySchedulePayload()" id="btnCopyPayload" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
+                                <i class="fa-regular fa-copy"></i> Copy Scan Link
                             </button>
-                            <p class="text-[10px] text-slate-400 text-center">
-                                Zero server connection required • Data encoded directly into the QR pattern
-                            </p>
                         </div>
                     </div>
-
                 </div>
 
             </div>
         </div>
-
-    </main>
+    </div>
 
     <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script>
         let appState = { mode: 'titration', name: '', gender: 'male' };
-        let activePayloadString = '';
-        let qrCodeInstance = null;
+        let activePatientScanUrl = '';
+        let activePatientData = null;
+        let preGeneratedPatientFile = null;
+        let preGeneratedImgUrl = null;
 
-        // Clinical dictionary
         const SE_DICT = {
             'dizziness': { label: 'Dizziness', ar: 'دوخة / دوار' },
             'sleepiness': { label: 'Sleepiness/Drowsiness', ar: 'نعاس / رغبة بالنوم' },
@@ -479,6 +491,100 @@
             'other': { name: 'Other', nameAr: 'دواء آخر', dose: 0, step: 0, target: 0, freq: '1 Week', effects: ['dizziness', 'nausea', 'headache', 'rash_general', 'sleepiness'] }
         };
 
+        // ================= QR CODE SCAN DETECTION =================
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('view') === 'patient' && params.get('p')) {
+                launchPatientScanMode(params.get('p'));
+            }
+        });
+
+        function launchPatientScanMode(encodedPayload) {
+            try {
+                const jsonStr = decodeURIComponent(escape(atob(encodedPayload)));
+                const data = JSON.parse(jsonStr);
+                activePatientData = data;
+
+                // 1. Hide doctor workspace and show patient mobile view
+                document.getElementById('doctor-workspace').style.display = 'none';
+                const patientView = document.getElementById('patient-phone-view');
+                patientView.classList.remove('hidden');
+
+                // 2. Mount infographic into patient view
+                const infographicEl = document.getElementById('infographic-container');
+                document.getElementById('patient-infographic-slot').appendChild(infographicEl);
+
+                // 3. Render HTML schedule table
+                buildInfographicDOM(data);
+
+                // 4. Pre-render High-Res Image IMMEDIATELY for Instant 1-Tap Save
+                setTimeout(() => {
+                    html2canvas(infographicEl, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
+                        canvas.toBlob(blob => {
+                            if (!blob) return;
+                            const patientCleanName = (data.pt || 'Patient').replace(/\s+/g, '_');
+                            preGeneratedPatientFile = new File([blob], `Schedule-${patientCleanName}.png`, { type: 'image/png' });
+                            preGeneratedImgUrl = canvas.toDataURL('image/png');
+
+                            // Display pre-rendered image on phone screen
+                            const imgEl = document.getElementById('patient-pre-rendered-img');
+                            imgEl.src = preGeneratedImgUrl;
+                            imgEl.classList.remove('hidden');
+                            
+                            // Hide DOM element once native image is displayed
+                            document.getElementById('patient-infographic-slot').classList.add('hidden');
+                            
+                            const statusEl = document.getElementById('patient-render-status');
+                            statusEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> جاهز للحفظ المباشر';
+                        }, 'image/png');
+                    });
+                }, 200);
+
+            } catch (err) {
+                console.error("Error decoding barcode payload:", err);
+                alert("Error loading schedule pass.");
+            }
+        }
+
+        // ================= DIRECT NATIVE SAVE TO IPHONE/ANDROID PHOTOS =================
+        async function savePatientImageToPhotos() {
+            const btn = document.getElementById('btnSaveToStudio');
+            const originalContent = btn.innerHTML;
+
+            const patientCleanName = (activePatientData && activePatientData.pt) ? activePatientData.pt.replace(/\s+/g, '_') : 'Patient';
+
+            // METHOD A: System Share Sheet (Direct to Photos app on iOS)
+            if (preGeneratedPatientFile && navigator.canShare && navigator.canShare({ files: [preGeneratedPatientFile] })) {
+                try {
+                    await navigator.share({
+                        files: [preGeneratedPatientFile],
+                        title: 'جدول تنظيم جرعات الدواء',
+                        text: `جدول تنظيم جرعات الدواء للمريض ${activePatientData?.pt || ''}`
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error('Share failed, attempting fallback download:', err);
+                    } else {
+                        return;
+                    }
+                }
+            }
+
+            // METHOD B: Direct Download Link Fallback
+            if (preGeneratedImgUrl) {
+                const link = document.createElement('a');
+                link.download = `Schedule-${patientCleanName}.png`;
+                link.href = preGeneratedImgUrl;
+                link.click();
+                btn.innerHTML = '<i class="fa-solid fa-check text-lg"></i> تم حفظ الملف!';
+                setTimeout(() => { btn.innerHTML = originalContent; }, 2500);
+            } else {
+                alert("جاري تجهيز الصورة، يرجى الضغط مرة أخرى خلال ثانيتين أو لمس الصورة مطولاً لحفظها.");
+            }
+        }
+
+        // ================= DOCTOR WORKSPACE LOGIC =================
         function selectMode(mode) {
             const name = document.getElementById('landingName').value.trim();
             const gender = document.getElementById('landingGender').value;
@@ -495,7 +601,6 @@
 
             document.getElementById('displayPatientName').innerText = name;
             document.getElementById('displayMode').innerText = mode === 'titration' ? "Titration (Escalate)" : "Tapering (Wean Off)";
-            document.getElementById('navBackBtn').classList.remove('hidden');
 
             const lblCurrentDose = document.getElementById('lblCurrentDose');
             if (mode === 'tapering') {
@@ -507,7 +612,6 @@
                 document.getElementById('se-section').style.display = 'block';
             }
 
-            // Transition from Landing to Tool view
             document.getElementById('view-landing').classList.add('hidden');
             document.getElementById('view-tool').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -516,7 +620,6 @@
         function goBackToLanding() {
             document.getElementById('view-tool').classList.add('hidden');
             document.getElementById('view-landing').classList.remove('hidden');
-            document.getElementById('navBackBtn').classList.add('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -568,6 +671,7 @@
             });
         }
 
+        // ================= SCHEDULE GENERATION =================
         function generateSchedule() {
             const drugKey = document.getElementById('drugSelect').value;
             if (!drugKey) { alert("Please select a medication first."); return; }
@@ -602,21 +706,49 @@
             if (currentSingleDose < 0 || targetSingleDose < 0) { alert("Doses cannot be negative."); return; }
             if (stepPerDose <= 0) { alert("Step amount must be greater than 0."); return; }
 
-            // Infographic Header and Warnings
-            const greeting = appState.gender === 'female' ? 'الأخت الفاضلة' : 'الأخ الفاضل';
-            if (appState.mode === 'tapering') {
-                document.getElementById('outHeader').innerHTML = `${greeting} ${appState.name}، إليك جدول سحب الدواء وإيقافه تدريجياً<br><span class="text-emerald-200 text-sm mt-1 block">كتب الله لك الشفاء و الصحة دائماً</span>`;
+            const checkedBoxes = document.querySelectorAll('.se-check:checked');
+            const selectedEffects = Array.from(checkedBoxes).map(cb => cb.value);
+
+            const schedulePayload = {
+                pt: appState.name,
+                gen: appState.gender,
+                mode: appState.mode,
+                drugKey: drugKey,
+                drug: drugNameDisplay,
+                drugAr: drugNameAr,
+                cur: currentSingleDose,
+                tgt: targetSingleDose,
+                step: stepPerDose,
+                tab: tabStrength,
+                freq: frequency,
+                type: scheduleType,
+                se: selectedEffects
+            };
+
+            buildInfographicDOM(schedulePayload);
+            document.getElementById('preview-area').classList.remove('hidden');
+
+            renderStudioBarcode(schedulePayload);
+
+            document.getElementById('preview-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function buildInfographicDOM(data) {
+            const greeting = data.gen === 'female' ? 'الأخت الفاضلة' : 'الأخ الفاضل';
+            
+            if (data.mode === 'tapering') {
+                document.getElementById('outHeader').innerHTML = `${greeting} ${data.pt}، إليك جدول سحب الدواء وإيقافه تدريجياً<br><span class="text-emerald-200 text-sm mt-1 block">كتب الله لك الشفاء و الصحة دائماً</span>`;
                 document.getElementById('outSideEffects').innerHTML = `<span class="text-red-600 font-bold text-xs">في حال تكرار النوبات لا قدر الله، يجب العودة للجرعة السابقة فوراً والتواصل مع الطبيب المعالج.</span>`;
                 document.getElementById('disclaimerBox').innerHTML = '';
                 document.getElementById('finalInstructionBox').style.display = 'none';
             } else {
-                document.getElementById('outHeader').innerHTML = `${greeting} ${appState.name}، إليك تعليمات استخدام الدواء الجديد<br><span class="text-emerald-200 text-sm mt-1 block">كتب الله لك الشفاء و الصحة دائماً</span>`;
+                document.getElementById('outHeader').innerHTML = `${greeting} ${data.pt}، إليك تعليمات استخدام الدواء الجديد<br><span class="text-emerald-200 text-sm mt-1 block">كتب الله لك الشفاء و الصحة دائماً</span>`;
                 
-                const checkedBoxes = document.querySelectorAll('.se-check:checked');
-                const seList = Array.from(checkedBoxes).map(cb => {
-                    const item = SE_DICT[cb.value];
+                const seList = (data.se || []).map(val => {
+                    const item = SE_DICT[val];
+                    if (!item) return '';
                     return item.isAlert ? `<span class="text-red-600 font-bold underline decoration-red-300">${item.ar}</span>` : item.ar;
-                });
+                }).filter(Boolean);
 
                 if (seList.length > 0) {
                     document.getElementById('outSideEffects').innerHTML = `<ul class="list-disc pr-4 space-y-1">${seList.map(s => `<li>${s}</li>`).join('')}</ul>`;
@@ -628,14 +760,14 @@
                 document.getElementById('finalInstructionBox').style.display = 'block';
             }
 
-            document.getElementById('outDrug').innerText = drugNameAr;
-            document.getElementById('outPatientNamePrint').innerText = appState.name;
+            document.getElementById('outDrug').innerText = data.drugAr;
+            document.getElementById('outPatientNamePrint').innerText = data.pt;
 
-            const isMonthUnit = (frequency === '1 Month' || frequency === '2 Months');
-            let timeUnitsPerStep = (frequency === '2 Weeks' || frequency === '2 Months') ? 2 : 1;
+            const isMonthUnit = (data.freq === '1 Month' || data.freq === '2 Months');
+            let timeUnitsPerStep = (data.freq === '2 Weeks' || data.freq === '2 Months') ? 2 : 1;
 
-            const showAM = (scheduleType === 'BID' || scheduleType === 'OD_AM');
-            const showPM = (scheduleType === 'BID' || scheduleType === 'OD_PM');
+            const showAM = (data.type === 'BID' || data.type === 'OD_AM');
+            const showPM = (data.type === 'BID' || data.type === 'OD_PM');
 
             let headerHtml = '';
             if (showAM) headerHtml += '<div class="flex-1 text-center">الصباح ☀️</div>';
@@ -648,45 +780,45 @@
             container.innerHTML = '';
             const steps = [];
 
-            if (appState.mode === 'titration') {
-                let currDose = currentSingleDose;
+            if (data.mode === 'titration') {
+                let currDose = data.cur;
                 let safety = 0;
                 while (safety < 50) {
                     let am = 0, pm = 0;
-                    if (scheduleType === 'OD_AM') { am = currDose; pm = 0; }
-                    else if (scheduleType === 'OD_PM') { am = 0; pm = currDose; }
+                    if (data.type === 'OD_AM') { am = currDose; pm = 0; }
+                    else if (data.type === 'OD_PM') { am = 0; pm = currDose; }
                     else { am = currDose; pm = currDose; }
 
-                    const isTarget = (currDose >= targetSingleDose);
+                    const isTarget = (currDose >= data.tgt);
                     const duration = isTarget ? 1 : timeUnitsPerStep;
                     steps.push({ am: am, pm: pm, duration: duration });
 
                     if (isTarget) break;
-                    currDose += stepPerDose;
-                    if (currDose > targetSingleDose) currDose = targetSingleDose;
+                    currDose += data.step;
+                    if (currDose > data.tgt) currDose = data.tgt;
                     safety++;
                 }
             } else {
-                let currDose = currentSingleDose - stepPerDose;
-                if (currDose < targetSingleDose) currDose = targetSingleDose;
+                let currDose = data.cur - data.step;
+                if (currDose < data.tgt) currDose = data.tgt;
 
                 let safety = 0;
                 let lastActiveDose = currDose;
 
-                while (((targetSingleDose === 0 && currDose > 0) || (targetSingleDose > 0 && currDose >= targetSingleDose)) && safety < 50) {
+                while (((data.tgt === 0 && currDose > 0) || (data.tgt > 0 && currDose >= data.tgt)) && safety < 50) {
                     lastActiveDose = currDose;
                     let am = 0, pm = 0;
-                    if (scheduleType === 'OD_AM') { am = currDose; pm = 0; }
-                    else if (scheduleType === 'OD_PM') { am = 0; pm = currDose; }
+                    if (data.type === 'OD_AM') { am = currDose; pm = 0; }
+                    else if (data.type === 'OD_PM') { am = 0; pm = currDose; }
                     else { am = currDose; pm = currDose; }
 
                     steps.push({ am: am, pm: pm, duration: timeUnitsPerStep });
-                    currDose -= stepPerDose;
+                    currDose -= data.step;
                     safety++;
                 }
 
-                if (targetSingleDose === 0 && (scheduleType === 'BID' || scheduleType === 'OD_AM')) {
-                    const finalPmDose = lastActiveDose > 0 ? lastActiveDose : stepPerDose;
+                if (data.tgt === 0 && (data.type === 'BID' || data.type === 'OD_AM')) {
+                    const finalPmDose = lastActiveDose > 0 ? lastActiveDose : data.step;
                     steps.push({ am: 0, pm: finalPmDose, duration: timeUnitsPerStep });
                 }
             }
@@ -695,8 +827,8 @@
             steps.forEach(step => {
                 const am = step.am;
                 const pm = step.pm;
-                const amPills = getPillText(am, tabStrength);
-                const pmPills = getPillText(pm, tabStrength);
+                const amPills = getPillText(am, data.tab);
+                const pmPills = getPillText(pm, data.tab);
 
                 for (let i = 0; i < step.duration; i++) {
                     let rowInner = '';
@@ -730,27 +862,47 @@
                 }
             });
 
-            // Reveal Preview Area
-            document.getElementById('preview-area').classList.remove('hidden');
+            data.totalPeriods = timeCount - 1;
+            data.periodUnit = isMonthUnit ? 'months' : 'weeks';
+        }
 
-            // Generate Client-Side QR Code Pass (Right Column)
-            renderClientQRCode({
-                pt: appState.name,
-                mode: appState.mode,
-                drug: drugNameDisplay,
-                cur: currentSingleDose,
-                tgt: targetSingleDose,
-                step: stepPerDose,
-                freq: frequency,
-                type: scheduleType,
-                totalPeriods: timeCount - 1,
-                unit: isMonthUnit ? 'months' : 'weeks'
+        // ================= BARCODE GENERATION =================
+        function renderStudioBarcode(payload) {
+            const jsonPayload = JSON.stringify(payload);
+            const base64Payload = btoa(unescape(encodeURIComponent(jsonPayload)));
+            
+            // Build dynamic URL using current origin and path (Works on GitHub Pages, Local, or Custom Domain)
+            const currentBaseUrl = window.location.origin + window.location.pathname;
+            activePatientScanUrl = `${currentBaseUrl}?view=patient&p=${encodeURIComponent(base64Payload)}`;
+
+            const qrBox = document.getElementById('qrcode-box');
+            qrBox.innerHTML = '';
+
+            new QRCode(qrBox, {
+                text: activePatientScanUrl,
+                width: 175,
+                height: 175,
+                colorDark: "#014d1a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
             });
 
-            // Mobile convenience: scroll down to preview on small screens
-            if (window.innerWidth < 1024) {
-                document.getElementById('preview-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            document.getElementById('qr-placeholder').classList.add('hidden');
+            document.getElementById('qr-code-wrapper').classList.remove('hidden');
+            document.getElementById('qr-code-wrapper').classList.add('flex');
+            document.getElementById('qr-meta-box').classList.remove('hidden');
+            document.getElementById('qrActionButtons').classList.remove('hidden');
+
+            const statusBadge = document.getElementById('qrStatusBadge');
+            statusBadge.innerText = "Ready to Scan";
+            statusBadge.className = "text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full uppercase";
+
+            document.getElementById('qrMetaPatient').innerText = payload.pt;
+            document.getElementById('qrMetaDrug').innerText = payload.drug;
+            document.getElementById('qrMetaRegimen').innerText = `${payload.tgt} mg (${payload.type})`;
+            document.getElementById('qrMetaWeeks').innerText = `${payload.totalPeriods} ${payload.periodUnit}`;
+
+            document.getElementById('btnTestPatientLink').href = activePatientScanUrl;
         }
 
         function getPillText(dose, strength) {
@@ -765,67 +917,16 @@
             return `${count} tab`;
         }
 
-        // ================= QR CODE GENERATION (NO SERVER API) =================
-        function renderClientQRCode(data) {
-            const qrWrapper = document.getElementById('qr-code-wrapper');
-            const qrPlaceholder = document.getElementById('qr-placeholder');
-            const qrMetaBox = document.getElementById('qr-meta-box');
-            const qrBox = document.getElementById('qrcode-box');
-
-            qrPlaceholder.classList.add('hidden');
-            qrWrapper.classList.remove('hidden');
-            qrWrapper.classList.add('flex');
-            qrMetaBox.classList.remove('hidden');
-
-            // Clear previous QR instance
-            qrBox.innerHTML = '';
-
-            // Format payload as a smart deep link schema
-            const compactPayload = {
-                app: "EpilepsyHub",
-                patient: data.pt,
-                mode: data.mode,
-                med: data.drug,
-                target: `${data.tgt}mg`,
-                frequency: data.type,
-                duration: `${data.totalPeriods} ${data.unit}`
-            };
-
-            // Can be scanned by any smartphone camera: shows clean deep-link structure
-            activePayloadString = `https://epilepsyhub.net/titration?data=${encodeURIComponent(JSON.stringify(compactPayload))}`;
-
-            qrCodeInstance = new QRCode(qrBox, {
-                text: activePayloadString,
-                width: 170,
-                height: 170,
-                colorDark: "#014d1a",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M
-            });
-
-            // Update Metadata side card
-            document.getElementById('qrMetaPatient').innerText = data.pt;
-            document.getElementById('qrMetaDrug').innerText = data.drug;
-            document.getElementById('qrMetaRegimen').innerText = `${data.tgt} mg (${data.type})`;
-            document.getElementById('qrMetaWeeks').innerText = `${data.totalPeriods} ${data.unit}`;
-        }
-
         function copySchedulePayload() {
-            if (!activePayloadString) {
-                alert("Please generate a schedule first.");
-                return;
-            }
-            navigator.clipboard.writeText(activePayloadString).then(() => {
+            if (!activePatientScanUrl) return;
+            navigator.clipboard.writeText(activePatientScanUrl).then(() => {
                 const btn = document.getElementById('btnCopyPayload');
                 const orig = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600"></i> Copied to Clipboard!';
+                btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600"></i> Copied Scan Link!';
                 setTimeout(() => { btn.innerHTML = orig; }, 2000);
-            }).catch(err => {
-                alert("Copied link: " + activePayloadString);
             });
         }
 
-        // ================= IMAGE EXPORT & SHARING =================
         function downloadImage() {
             const element = document.getElementById("infographic-container");
             html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
@@ -843,13 +944,13 @@
             try {
                 const canvas = await html2canvas(element, { scale: 2.5, backgroundColor: '#ffffff', useCORS: true });
                 canvas.toBlob(async (blob) => {
-                    if (!blob) { alert("Error generating schedule image."); btn.innerHTML = originalText; return; }
+                    if (!blob) { alert("Error generating image."); btn.innerHTML = originalText; return; }
                     const file = new File([blob], `Schedule-${appState.name.replace(/\s+/g, '_')}.png`, { type: "image/png" });
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         try { await navigator.share({ files: [file], title: 'Medication Schedule' }); } 
                         catch (err) { if (err.name !== 'AbortError') console.error(err); }
                     } else { 
-                        alert("Direct system sharing not supported on this browser. Use the 'Save Image' button to download."); 
+                        alert("Direct sharing not supported on this browser. Click 'Save Image' instead."); 
                     }
                     btn.innerHTML = originalText;
                 }, 'image/png');
