@@ -750,8 +750,7 @@
                     return item.isAlert ? `<span class="text-red-600 font-bold underline decoration-red-300">${item.ar}</span>` : item.ar;
                 }).filter(Boolean);
 
-                if (seList.length > 0) {
-                    document.getElementById('outSideEffects').innerHTML = `<ul class="list-disc pr-4 space-y-1">${seList.map(s => `<li>${s}</li>`).join('')}</ul>`;
+                if (seList.length > 0) document.getElementById('outSideEffects').innerHTML = `<ul class="list-disc list-inside space-y-1">${seList.map(s => `<li>${s}</li>`).join('')}</ul>`;
                 } else {
                     document.getElementById('outSideEffects').innerText = 'لم يتم تحديد أعراض جانبية خاصة. الالتزام بالجرعات يضمن الفعالية والأمان.';
                 }
